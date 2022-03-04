@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\Url\SecurityInfo">
+        <arguments>
+            <argument name="secureUrlList" xsi:type="array">
+                <item name="seller" xsi:type="string">/seller/</item>
+            </argument>
+            <argument name="excludedUrlList" xsi:type="array">
+                <item name="seller_sections" xsi:type="string">/seller/section/load</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\View\Layout">
+        <plugin name="seller-session-depersonalize" type="Magento\Seller\Model\Layout\DepersonalizePlugin" sortOrder="10" />
+    </type>
+    <type name="Magento\Framework\App\ActionInterface">
+        <plugin name="seller-app-action-executeController-context-plugin" type="Magento\Seller\Model\App\Action\ContextPlugin" sortOrder="10" />
+    </type>
+    <preference for="Magento\Seller\SellerData\SectionPoolInterface" type="Magento\Seller\SellerData\SectionPool" />
+    <type name="Magento\Seller\SellerData\SectionPoolInterface">
+        <arguments>
+            <argument name="sectionSourceMap" xsi:type="array">
+                <item name="seller" xsi:type="string">Magento\Seller\SellerData\Seller</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Seller\Controller\Plugin\Account">
+        <arguments>
+            <argument name="allowedActions" xsi:type="array">
+                <item name="create" xsi:type="string">create</item>
+                <item name="login" xsi:type="string">login</item>
+                <item name="logoutsuccess" xsi:type="string">logoutsuccess</item>
+                <item name="forgotpassword" xsi:type="string">forgotpassword</item>
+                <item name="forgotpasswordpost" xsi:type="string">forgotpasswordpost</item>
+                <item name="resetpassword" xsi:type="string">resetpassword</item>
+                <item name="resetpasswordpost" xsi:type="string">resetpasswordpost</item>
+                <item name="confirm" xsi:type="string">confirm</item>
+                <item name="confirmation" xsi:type="string">confirmation</item>
+                <item name="createpassword" xsi:type="string">createpassword</item>
+                <item name="createpost" xsi:type="string">createpost</item>
+                <item name="loginpost" xsi:type="string">loginpost</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Seller\Controller\AccountInterface">
+        <plugin name="seller_account" type="Magento\Seller\Controller\Plugin\Account" />
+    </type>
+    <type name="Magento\Checkout\Block\Cart\Sidebar">
+        <plugin name="seller_cart" type="Magento\Seller\Model\Cart\ConfigPlugin" />
+    </type>
+    <type name="Magento\Framework\Session\SessionManagerInterface">
+        <plugin name="session_checker" type="Magento\Seller\SellerData\Plugin\SessionChecker" />
+    </type>
+    <type name="Magento\Authorization\Model\CompositeUserContext">
+        <arguments>
+            <argument name="userContexts" xsi:type="array">
+                <item name="sellerSessionUserContext" xsi:type="array">
+                    <item name="type" xsi:type="object">Magento\Seller\Model\Authorization\SellerSessionUserContext</item>
+                    <item name="sortOrder" xsi:type="string">10</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Seller\Block\SellerData">
+        <arguments>
+            <argument name="expirableSectionNames" xsi:type="array">
+                <item name="cart" xsi:type="string">cart</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\View\Element\Message\MessageConfigurationsPool">
+        <arguments>
+            <argument name="configurationsMap" xsi:type="array">
+                <item name="sellerAlreadyExistsErrorMessage" xsi:type="array">
+                    <item name="renderer" xsi:type="const">\Magento\Framework\View\Element\Message\Renderer\BlockRenderer::CODE</item>
+                    <item name="data" xsi:type="array">
+                        <item name="template" xsi:type="string">Magento_Seller::messages/sellerAlreadyExistsErrorMessage.phtml</item>
+                    </item>
+                </item>
+                <item name="confirmAccountSuccessMessage" xsi:type="array">
+                    <item name="renderer" xsi:type="const">\Magento\Framework\View\Element\Message\Renderer\BlockRenderer::CODE</item>
+                    <item name="data" xsi:type="array">
+                        <item name="template" xsi:type="string">Magento_Seller::messages/confirmAccountSuccessMessage.phtml</item>
+                    </item>
+                </item>
+                <item name="confirmAccountErrorMessage" xsi:type="array">
+                    <item name="renderer" xsi:type="const">\Magento\Framework\View\Element\Message\Renderer\BlockRenderer::CODE</item>
+                    <item name="data" xsi:type="array">
+                        <item name="template" xsi:type="string">Magento_Seller::messages/confirmAccountErrorMessage.phtml</item>
+                    </item>
+                </item>
+                <item name="sellerVatShippingAddressSuccessMessage" xsi:type="array">
+                    <item name="renderer" xsi:type="const">\Magento\Framework\View\Element\Message\Renderer\BlockRenderer::CODE</item>
+                    <item name="data" xsi:type="array">
+                        <item name="template" xsi:type="string">Magento_Seller::messages/sellerVatShippingAddressSuccessMessage.phtml</item>
+                    </item>
+                </item>
+                <item name="sellerVatBillingAddressSuccessMessage" xsi:type="array">
+                    <item name="renderer" xsi:type="const">\Magento\Framework\View\Element\Message\Renderer\BlockRenderer::CODE</item>
+                    <item name="data" xsi:type="array">
+                        <item name="template" xsi:type="string">Magento_Seller::messages/sellerVatBillingAddressSuccessMessage.phtml</item>
+                    </item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Store\Model\StoreSwitcher\RedirectDataPreprocessorComposite">
+        <arguments>
+            <argument name="processors" xsi:type="array">
+                <item name="seller_session" xsi:type="object">Magento\Seller\Model\StoreSwitcher\RedirectDataPreprocessor</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Store\Model\StoreSwitcher\RedirectDataPostprocessorComposite">
+        <arguments>
+            <argument name="processors" xsi:type="array">
+                <item name="seller_session" xsi:type="object">Magento\Seller\Model\StoreSwitcher\RedirectDataPostprocessor</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

@@ -1,0 +1,26 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var \Magento\Seller\Block\SellerData $block */
+
+// phpcs:disable Magento2.Templates.ThisInTemplate.FoundHelper
+?>
+<script type="text/x-magento-init">
+    {
+        "*": {
+            "Magento_Seller/js/seller-data": {
+                "sectionLoadUrl": "<?= $block->escapeJs($block->getSellerDataUrl('seller/section/load')) ?>",
+                "expirableSectionLifetime": <?= (int)$block->getExpirableSectionLifetime() ?>,
+                "expirableSectionNames": <?= /* @noEscape */ $this->helper(\Magento\Framework\Json\Helper\Data::class)
+                    ->jsonEncode($block->getExpirableSectionNames()) ?>,
+                "cookieLifeTime": "<?= $block->escapeJs($block->getCookieLifeTime()) ?>",
+                "updateSessionUrl": "<?= $block->escapeJs(
+                    $block->getSellerDataUrl('seller/account/updateSession')
+                ) ?>"
+            }
+        }
+    }
+</script>

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="controller_action_predispatch">
+        <observer name="seller_visitor" instance="Magento\Seller\Observer\Visitor\InitByRequestObserver" />
+    </event>
+    <event name="controller_action_postdispatch">
+        <observer name="seller_visitor" instance="Magento\Seller\Observer\Visitor\SaveByRequestObserver" />
+    </event>
+    <event name="seller_data_object_login">
+        <observer name="seller_visitor" instance="Magento\Seller\Observer\Visitor\BindSellerLoginObserver" />
+    </event>
+    <event name="seller_logout">
+        <observer name="seller_visitor" instance="Magento\Seller\Observer\Visitor\BindSellerLogoutObserver" />
+        <observer name="seller_log_logout" instance="Magento\Seller\Observer\LogLastLogoutAtObserver" />
+    </event>
+    <event name="checkout_quote_destroy">
+        <observer name="seller_visitor" instance="Magento\Seller\Observer\Visitor\BindQuoteDestroyObserver" />
+    </event>
+    <event name="seller_login">
+        <observer name="seller_log_login" instance="Magento\Seller\Observer\LogLastLoginAtObserver" />
+    </event>
+    <event name="seller_seller_authenticated">
+        <observer name="seller_password" instance="Magento\Seller\Observer\UpgradeSellerPasswordObserver" />
+        <observer name="seller_unlock" instance="Magento\Seller\Observer\SellerLoginSuccessObserver" />
+    </event>
+</config>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page_types xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_types.xsd">
+    <type id="seller_account_confirmation" label="Seller Account Confirmation" />
+    <type id="seller_account_create" label="Seller Account Registration Form" />
+    <type id="seller_account_createpassword" label="Reset a Password" />
+    <type id="seller_account_edit" label="Seller Account Edit Form" />
+    <type id="seller_account_forgotpassword" label="Seller Forgot Password Form" />
+    <type id="seller_account_index" label="Seller My Account" />
+    <type id="seller_account_login" label="Seller Account Login Form" />
+    <type id="seller_account_logoutsuccess" label="Seller Account Logout Success" />
+    <type id="seller_address_form" label="Seller My Account Address Edit Form" />
+    <type id="seller_address_index" label="Seller My Account Address Book" />
+</page_types>

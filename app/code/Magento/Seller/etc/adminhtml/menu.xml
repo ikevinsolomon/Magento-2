@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Magento_Seller::seller" title="Sellers" translate="title" module="Magento_Seller" sortOrder="30" resource="Magento_Seller::seller" />
+        <add id="Magento_Seller::seller_manage" title="All Sellers" translate="title" module="Magento_Seller" sortOrder="10" parent="Magento_Seller::seller" action="seller/index/" resource="Magento_Seller::manage" />
+        <add id="Magento_Seller::seller_online" title="Now Online" translate="title" module="Magento_Seller" sortOrder="30" parent="Magento_Seller::seller" action="seller/online/" resource="Magento_Seller::online" />
+        <add id="Magento_Seller::seller_group" title="Seller Groups" translate="title" module="Magento_Seller" sortOrder="50" parent="Magento_Seller::seller" action="seller/group" resource="Magento_Seller::group" />
+    </menu>
+</config>

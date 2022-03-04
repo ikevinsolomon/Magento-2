@@ -1,0 +1,37 @@
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<!--@subject {{trans "Please confirm your %store_name account" store_name=$store.frontend_name}} @-->
+<!--@vars {
+"var store.frontend_name":"Store Name",
+"var this.getUrl($store,'seller/account/confirm/',[_query:[id:$seller.id,key:$seller.confirmation,back_url:$back_url],_nosid:1])":"Account Confirmation URL",
+"var this.getUrl($store, 'seller/account/')":"Seller Account URL",
+"var seller.email":"Seller Email",
+"var seller.name":"Seller Name"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<p class="greeting">{{trans "%name," name=$seller.name}}</p>
+<p>{{trans "You must confirm your %seller_email email before you can sign in (link is only valid once):"
+    seller_email=$seller.email}}</p>
+
+<table class="button" width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td>
+            <table class="inner-wrapper" border="0" cellspacing="0" cellpadding="0" align="center">
+                <tr>
+                    <td align="center">
+                        <a href="{{var this.getUrl($store,'seller/account/confirm/',[_query:[id:$seller.id,key:$seller.confirmation,back_url:$back_url],_nosid:1])}}"
+                            target="_blank">{{trans "Confirm Your Account"}}</a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer_template"}}
