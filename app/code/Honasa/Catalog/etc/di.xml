@@ -1,0 +1,4 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Honasa\Catalog\Api\Data\ProductInterface" type="Honasa\Catalog\Model\ProductData"/>
+    <preference for="Honasa\Catalog\Api\Data\CategoryInterface" type="Honasa\Catalog\Model\CategoryData"/>
+</config>
