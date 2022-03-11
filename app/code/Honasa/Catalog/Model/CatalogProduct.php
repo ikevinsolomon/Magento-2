@@ -17,21 +17,21 @@ class CatalogProduct implements CatalogProductInterface
 
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
-    protected $productFactory;
+    protected $productCollectionFactory;
     protected $productRepository;
     protected $product;
 
     public function __construct(
         \Magento\Catalog\Model\Product                                 $product,
         \Magento\Catalog\Api\ProductRepositoryInterface                $productRepository,
-        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productFactory,
+        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollectionFactory,
         \Magento\Framework\Api\SearchCriteriaBuilder                   $searchCriteriaBuilder,
         array                                                          $data = []
     )
     {
         $this->product = $product;
         $this->productRepository = $productRepository;
-        $this->productFactory = $productFactory;
+        $this->productCollectionFactory = $productCollectionFactory;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
@@ -109,7 +109,7 @@ class CatalogProduct implements CatalogProductInterface
         ];
 
         try {
-            $products = $this->productFactory->create();
+            $products = $this->productCollectionFactory->create();
             $products->addAttributeToSelect('*');
             $products = $this->transformProduct($products);
             return [
@@ -135,7 +135,7 @@ class CatalogProduct implements CatalogProductInterface
         ];
 
         try {
-            $products = $this->productFactory->create();
+            $products = $this->productCollectionFactory->create();
             $products->addAttributeToSelect('*');
             $products->setPageSize($pageSize);
             $products->setPageSize($pageSize);
@@ -163,7 +163,7 @@ class CatalogProduct implements CatalogProductInterface
             'data' => []
         ];
         try {
-            $products = $this->productFactory->create();
+            $products = $this->productCollectionFactory->create();
             $products->addAttributeToSelect('*')->addFieldToFilter('entity_id', array('in' => $productId));
             $products = $this->transformProduct($products);
             return [
@@ -187,7 +187,7 @@ class CatalogProduct implements CatalogProductInterface
             'data' => []
         ];
         try {
-            $products = $this->productFactory->create();
+            $products = $this->productCollectionFactory->create();
             $products->addAttributeToSelect('*')->addAttributeToFilter(
                 [
                     ['attribute' => 'url_key', 'eq' => $productSlug],
@@ -207,7 +207,7 @@ class CatalogProduct implements CatalogProductInterface
     }
 
 
-    public function getCategoryDetailsById($categoryIds)
+    public function getProductsByCategoryId($categoryIds)
     {
         $response = [
             'status' => 200,
@@ -216,7 +216,7 @@ class CatalogProduct implements CatalogProductInterface
             'data' => []
         ];
         try {
-            $products = $this->productFactory->create();
+            $products = $this->productCollectionFactory->create();
             $products->addAttributeToSelect('*')->addCategoriesFilter(['in' => $categoryIds]);
             $products = $this->transformProduct($products);
             return [
@@ -233,7 +233,34 @@ class CatalogProduct implements CatalogProductInterface
 
     public function getUpSellProductsBySlug($productSlug)
     {
-        // TODO: Implement getUpSellProductsBySlug() method.
+        $response = [
+            'status' => 200,
+            'resource' => self::CATALOG_PRODUCT_RESOURCE,
+            'message' => 'No Products Found',
+            'data' => []
+        ];
+        try {
+            $products = $this->productCollectionFactory->create();
+            $products->addAttributeToSelect('*')->addAttributeToFilter(
+                [
+                    ['attribute' => 'url_key', 'eq' => $productSlug],
+                ]
+            );
+            $upsellProducts = $products->getUpSellProducts();
+            foreach ($upsellProducts as $upsellProduct) {
+                $upsellProducts = $this->transformProduct($upsellProduct);
+            }
+
+            return [
+                'status' => 200,
+                'resource' => self::CATALOG_PRODUCT_RESOURCE,
+                'message' => 'success',
+                'data' => $upsellProducts
+            ];
+
+        } catch (Exception $e) {
+            return $response;
+        }
     }
 
     public function getCrossSellProductsBySlug($productSlug)

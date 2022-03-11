@@ -88,5 +88,5 @@ interface CatalogProductInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getCategoryDetailsById($categoryIds);
+    public function getProductsByCategoryId($categoryIds);
 }
