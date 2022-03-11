@@ -26,12 +26,15 @@ class CatalogProduct implements CatalogProductInterface
         \Magento\Catalog\Api\ProductRepositoryInterface                $productRepository,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollectionFactory,
         \Magento\Framework\Api\SearchCriteriaBuilder                   $searchCriteriaBuilder,
+        \Magento\CatalogInventory\Model\Stock\StockItemRepository      $stockItemRepository,
+
         array                                                          $data = []
     )
     {
         $this->product = $product;
         $this->productRepository = $productRepository;
         $this->productCollectionFactory = $productCollectionFactory;
+        $this->stockItemRepository = $stockItemRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
@@ -48,7 +51,6 @@ class CatalogProduct implements CatalogProductInterface
         return $mediaGallery;
     }
 
-
     /*
      * Note calling productRepository adds almost 2s to API from 340ms to 2.6s
      */
@@ -62,26 +64,11 @@ class CatalogProduct implements CatalogProductInterface
         return $customAttributes;
     }
 
-    /*
-     * Note calling productRepository adds almost 2s to API from 340ms to 2.6s
-     */
-    public function getProductCategories($productSku)
-    {
-        $categories = [];
-        $categoriesEntries = $this->productRepository->get($productSku)->getCategoryIds();
-        foreach ($categoriesEntries as $categoriesEntry) {
-            $categories[] = $categoriesEntry;
-        }
-        return $categories;
-    }
-
     public function transformProduct($products)
     {
         $result = [];
         if (isset($products) && count($products) > 0) {
             foreach ($products as $product) {
-                \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)->debug('$product->getId()', ['$product->getId()' => $product->getId()]);
-                \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)->debug('$product->getName()', ['$product->getName()' => $product->getName()]);
                 $result[] = [
                     'id' => $product->getId(),
                     'type' => $product->getTypeId(),
@@ -92,6 +79,11 @@ class CatalogProduct implements CatalogProductInterface
                     'small_image' => $product->getSmallImage(),
                     'thumbnail' => $product->getThumbnail(),
                     'price' => number_format($product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue(), 2, '.', ','),
+                    'is_in_stock' => $this->stockItemRepository->get($product->getId())->getIsInStock(),
+                    'qty' => $this->stockItemRepository->get($product->getId())->getQty(),
+                    'min_qty' => $this->stockItemRepository->get($product->getId())->getMinQty(),
+                    'min_sale_qty' => $this->stockItemRepository->get($product->getId())->getMinSaleQty(),
+                    'max_sale_qty' => $this->stockItemRepository->get($product->getId())->getMaxSaleQty(),
                     'categories' => $product->getCategoryIds(),
                     'created_at' => $product->getCreatedAt(),
                     'updated_at' => $product->getUpdatedAt(),
