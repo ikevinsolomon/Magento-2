@@ -225,7 +225,7 @@ class CatalogProduct implements CatalogProductInterface
     {
         $response = [
             'status' => 200,
-            'resource' => self::CATALOG_PRODUCT_RESOURCE,
+            'resource' => self::CATALOG_CATEGORY_RESOURCE,
             'message' => 'No Products in Category Found',
             'data' => []
         ];
@@ -233,11 +233,39 @@ class CatalogProduct implements CatalogProductInterface
             $categories = $this->categoryCollectionFactory->create();
             $categories->addAttributeToSelect('*')->addFieldToFilter('entity_id', array('in' => $categoryId));
             $categories->setStore($this->storeManager->getStore());
-            $categories->addAttributeToFilter('is_active','1');
+            $categories->addAttributeToFilter('is_active', '1');
             $categories = $this->transformCategory($categories);
             return [
                 'status' => 200,
-                'resource' => self::CATALOG_PRODUCT_RESOURCE,
+                'resource' => self::CATALOG_CATEGORY_RESOURCE,
+                'message' => 'success',
+                'data' => $categories
+            ];
+
+        } catch (Exception $e) {
+            return $response;
+        }
+    }
+
+    public function getProductsByCategorySlug($categorySlug)
+    {
+        $response = [
+            'status' => 200,
+            'resource' => self::CATALOG_CATEGORY_RESOURCE,
+            'message' => 'No Products in Category Found',
+            'data' => []
+        ];
+        try {
+            $categories = $this->categoryCollectionFactory->create();
+            $categories->addAttributeToSelect('*')->addFieldToFilter( [
+                ['attribute' => 'url_key', 'eq' => $categorySlug],
+            ]);
+            $categories->setStore($this->storeManager->getStore());
+            $categories->addAttributeToFilter('is_active', '1');
+            $categories = $this->transformCategory($categories);
+            return [
+                'status' => 200,
+                'resource' => self::CATALOG_CATEGORY_RESOURCE,
                 'message' => 'success',
                 'data' => $categories
             ];

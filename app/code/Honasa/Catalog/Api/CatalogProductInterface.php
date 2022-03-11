@@ -89,4 +89,14 @@ interface CatalogProductInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getProductsByCategoryId($categoryId);
+
+    /**
+     * Get list of products by category Ids
+     * @api
+     * @param string $categorySlug
+     * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getProductsByCategorySlug($categorySlug);
 }
