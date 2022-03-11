@@ -78,8 +78,10 @@ class CatalogProduct implements CatalogProductInterface
     public function transformProduct($products)
     {
         $result = [];
-        if (isset($products)) {
+        if (isset($products) && count($products) > 0) {
             foreach ($products as $product) {
+                \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)->debug('$product->getId()', ['$product->getId()' => $product->getId()]);
+                \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)->debug('$product->getName()', ['$product->getName()' => $product->getName()]);
                 $result[] = [
                     'id' => $product->getId(),
                     'type' => $product->getTypeId(),
@@ -123,7 +125,6 @@ class CatalogProduct implements CatalogProductInterface
             return $response;
         }
     }
-
 
     public function getProductsByPage($pageNumber, $pageSize)
     {
@@ -206,7 +207,6 @@ class CatalogProduct implements CatalogProductInterface
         }
     }
 
-
     public function getProductsByCategoryId($categoryIds)
     {
         $response = [
@@ -246,18 +246,14 @@ class CatalogProduct implements CatalogProductInterface
                     ['attribute' => 'url_key', 'eq' => $productSlug],
                 ]
             );
-            $upsellProducts = $products->getUpSellProducts();
-            foreach ($upsellProducts as $upsellProduct) {
-                $upsellProducts = $this->transformProduct($upsellProduct);
-            }
-
+            $upSellProducts = $products->getFirstItem()->getUpSellProductCollection()->addAttributeToSelect('*');
+            $upSellProducts = $this->transformProduct($upSellProducts);
             return [
                 'status' => 200,
                 'resource' => self::CATALOG_PRODUCT_RESOURCE,
                 'message' => 'success',
-                'data' => $upsellProducts
+                'data' => $upSellProducts
             ];
-
         } catch (Exception $e) {
             return $response;
         }
@@ -265,11 +261,57 @@ class CatalogProduct implements CatalogProductInterface
 
     public function getCrossSellProductsBySlug($productSlug)
     {
-        // TODO: Implement getCrossSellProductsBySlug() method.
+        $response = [
+            'status' => 200,
+            'resource' => self::CATALOG_PRODUCT_RESOURCE,
+            'message' => 'No Products Found',
+            'data' => []
+        ];
+        try {
+            $products = $this->productCollectionFactory->create();
+            $products->addAttributeToSelect('*')->addAttributeToFilter(
+                [
+                    ['attribute' => 'url_key', 'eq' => $productSlug],
+                ]
+            );
+            $crossSell = $products->getFirstItem()->getCrossSellProductCollection()->addAttributeToSelect('*');
+            $crossSell = $this->transformProduct($crossSell);
+            return [
+                'status' => 200,
+                'resource' => self::CATALOG_PRODUCT_RESOURCE,
+                'message' => 'success',
+                'data' => $crossSell
+            ];
+        } catch (Exception $e) {
+            return $response;
+        }
     }
 
     public function getRelatedProductsBySlug($productSlug)
     {
-        // TODO: Implement getRelatedProductsBySlug() method.
+        $response = [
+            'status' => 200,
+            'resource' => self::CATALOG_PRODUCT_RESOURCE,
+            'message' => 'No Products Found',
+            'data' => []
+        ];
+        try {
+            $products = $this->productCollectionFactory->create();
+            $products->addAttributeToSelect('*')->addAttributeToFilter(
+                [
+                    ['attribute' => 'url_key', 'eq' => $productSlug],
+                ]
+            );
+            $relatedProducts = $products->getFirstItem()->getRelatedProductCollection()->addAttributeToSelect('*');
+            $relatedProducts = $this->transformProduct($relatedProducts);
+            return [
+                'status' => 200,
+                'resource' => self::CATALOG_PRODUCT_RESOURCE,
+                'message' => 'success',
+                'data' => $relatedProducts
+            ];
+        } catch (Exception $e) {
+            return $response;
+        }
     }
 }
