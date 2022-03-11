@@ -85,7 +85,7 @@ class CatalogProduct implements CatalogProductInterface
                     'type' => $product->getTypeId(),
                     'sku' => $product->getSku(),
                     'name' => $product->getName(),
-                    'slug' => $product->getUrlKey(),
+                    'url_key' => $product->getUrlKey(),
                     'image' => $product->getImage(),
                     'small_image' => $product->getSmallImage(),
                     'thumbnail' => $product->getThumbnail(),
@@ -193,6 +193,31 @@ class CatalogProduct implements CatalogProductInterface
                     ['attribute' => 'url_key', 'eq' => $productSlug],
                 ]
             );
+            $products = $this->transformProduct($products);
+            return [
+                'status' => 200,
+                'resource' => self::CATALOG_PRODUCT_RESOURCE,
+                'message' => 'success',
+                'data' => $products
+            ];
+
+        } catch (Exception $e) {
+            return $response;
+        }
+    }
+
+
+    public function getProductsByCategoryIds($categoryIds)
+    {
+        $response = [
+            'status' => 200,
+            'resource' => self::CATALOG_PRODUCT_RESOURCE,
+            'message' => 'No Products Found',
+            'data' => []
+        ];
+        try {
+            $products = $this->productFactory->create();
+            $products->addAttributeToSelect('*')->addCategoriesFilter(['in' => $categoryIds]);
             $products = $this->transformProduct($products);
             return [
                 'status' => 200,

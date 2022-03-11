@@ -40,7 +40,7 @@ interface CatalogProductInterface
 
 
     /**
-     * Get list of products
+     * Get product by slug
      * @param string $productSlug
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
@@ -50,7 +50,7 @@ interface CatalogProductInterface
 
 
     /**
-     * Get list of products
+     * Get list of upsell products by slug
      * @param string $productSlug
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
@@ -60,7 +60,7 @@ interface CatalogProductInterface
 
 
     /**
-     * Get list of products
+     * Get list of crosssell products by slug
      * @param string $productSlug
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
@@ -70,11 +70,22 @@ interface CatalogProductInterface
 
 
     /**
-     * Get list of products
+     * Get list of related products by slug
      * @param string $productSlug
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getRelatedProductsBySlug($productSlug);
+
+
+    /**
+     * Get list of products by category Ids
+     * @api
+     * @param string $categoryIds
+     * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getProductsByCategoryIds($categoryIds);
 }
