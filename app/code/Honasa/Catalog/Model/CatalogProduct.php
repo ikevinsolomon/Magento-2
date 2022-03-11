@@ -22,18 +22,22 @@ class CatalogProduct implements CatalogProductInterface
     protected $product;
 
     public function __construct(
-        \Magento\Catalog\Model\Product                                 $product,
-        \Magento\Catalog\Api\ProductRepositoryInterface                $productRepository,
-        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollectionFactory,
-        \Magento\Framework\Api\SearchCriteriaBuilder                   $searchCriteriaBuilder,
-        \Magento\CatalogInventory\Model\Stock\StockItemRepository      $stockItemRepository,
+        \Magento\Catalog\Model\Product                                  $product,
+        \Magento\Catalog\Api\ProductRepositoryInterface                 $productRepository,
+        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollectionFactory,
+        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
+        \Magento\Store\Model\StoreManagerInterface                      $storeManager,
+        \Magento\Framework\Api\SearchCriteriaBuilder                    $searchCriteriaBuilder,
+        \Magento\CatalogInventory\Model\Stock\StockItemRepository       $stockItemRepository,
 
-        array                                                          $data = []
+        array                                                           $data = []
     )
     {
         $this->product = $product;
         $this->productRepository = $productRepository;
         $this->productCollectionFactory = $productCollectionFactory;
+        $this->categoryCollectionFactory = $categoryCollectionFactory;
+        $this->storeManager = $storeManager;
         $this->stockItemRepository = $stockItemRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
@@ -70,7 +74,7 @@ class CatalogProduct implements CatalogProductInterface
         if (isset($products) && count($products) > 0) {
             foreach ($products as $product) {
                 $result[] = [
-                    'id' => $product->getId(),
+                    'id' => (int)$product->getId(),
                     'type' => $product->getTypeId(),
                     'sku' => $product->getSku(),
                     'name' => $product->getName(),
@@ -85,8 +89,26 @@ class CatalogProduct implements CatalogProductInterface
                     'min_sale_qty' => $this->stockItemRepository->get($product->getId())->getMinSaleQty(),
                     'max_sale_qty' => $this->stockItemRepository->get($product->getId())->getMaxSaleQty(),
                     'categories' => $product->getCategoryIds(),
+                    'position' => $product->getCatIndexPosition(),
                     'created_at' => $product->getCreatedAt(),
                     'updated_at' => $product->getUpdatedAt(),
+                ];
+            }
+        }
+        return $result;
+    }
+
+    public function transformCategory($categories)
+    {
+        $result = [];
+        if (isset($categories) && count($categories) > 0) {
+            foreach ($categories as $category) {
+                $result[] = [
+                    'id' => $category->getId(),
+                    'name' => $category->getName(),
+                    'url_key' => $category->getUrlKey(),
+                    'total_products' => $category->getProductCount(),
+                    'products' => $this->transformProduct($category->getProductCollection()->addAttributeToSelect('*')->addAttributeToSort('position'))
                 ];
             }
         }
@@ -199,23 +221,25 @@ class CatalogProduct implements CatalogProductInterface
         }
     }
 
-    public function getProductsByCategoryId($categoryIds)
+    public function getProductsByCategoryId($categoryId)
     {
         $response = [
             'status' => 200,
             'resource' => self::CATALOG_PRODUCT_RESOURCE,
-            'message' => 'No Products Found',
+            'message' => 'No Products in Category Found',
             'data' => []
         ];
         try {
-            $products = $this->productCollectionFactory->create();
-            $products->addAttributeToSelect('*')->addCategoriesFilter(['in' => $categoryIds]);
-            $products = $this->transformProduct($products);
+            $categories = $this->categoryCollectionFactory->create();
+            $categories->addAttributeToSelect('*')->addFieldToFilter('entity_id', array('in' => $categoryId));
+            $categories->setStore($this->storeManager->getStore());
+            $categories->addAttributeToFilter('is_active','1');
+            $categories = $this->transformCategory($categories);
             return [
                 'status' => 200,
                 'resource' => self::CATALOG_PRODUCT_RESOURCE,
                 'message' => 'success',
-                'data' => $products
+                'data' => $categories
             ];
 
         } catch (Exception $e) {

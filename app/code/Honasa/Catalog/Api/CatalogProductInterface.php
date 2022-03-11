@@ -83,10 +83,10 @@ interface CatalogProductInterface
     /**
      * Get list of products by category Ids
      * @api
-     * @param string $categoryIds
+     * @param int $categoryId
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getProductsByCategoryId($categoryIds);
+    public function getProductsByCategoryId($categoryId);
 }
