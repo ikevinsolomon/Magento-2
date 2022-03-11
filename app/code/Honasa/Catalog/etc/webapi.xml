@@ -1,45 +1,25 @@
 <?xml version="1.0"?>
-<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
-    <route url="/V1/products" method="GET">
-        <service class="Honasa\Catalog\Api\ProductDataInterface" method="getProducts"/>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/catalog/products" method="GET">
+        <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getProducts"/>
         <resources>
-            <resource ref="Honasa_Catalog::getProducts"/>
+            <resource ref="anonymous"/>
         </resources>
     </route>
 
-    <route url="/V1/products/:productId" method="GET">
-        <service class="Honasa\Catalog\Api\ProductDataInterface" method="getProductDetailsById"/>
+    <route url="/V1/catalog/products/:productId" method="GET">
+        <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getProductsById"/>
         <resources>
-            <resource ref="Honasa_Catalog::getProductDetailsById"/>
-        </resources>
-    </route>
-
-    <route url="/V1/products/:productSlug" method="GET">
-        <service class="Honasa\Catalog\Api\ProductDataInterface" method="getProductDetailsBySlug"/>
-        <resources>
-            <resource ref="Honasa_Catalog::getProductDetailsBySlug"/>
-        </resources>
-    </route>
-
-    <route url="/V1/products/:productId/cross-sell-products" method="GET">
-        <service class="Honasa\Catalog\Api\ProductDataInterface" method="getCrossSellProductsForProductById"/>
-        <resources>
-            <resource ref="Honasa_Catalog::getCrossSellProductsForProductById"/>
+            <resource ref="anonymous"/>
         </resources>
     </route>
 
 
-    <route url="/V1/products/:productId/up-sell-products" method="GET">
-        <service class="Honasa\Catalog\Api\ProductDataInterface" method="getUpSellProductsForProductById"/>
+    <route url="/V1/catalog/products/:productSlug" method="GET">
+        <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getProductsBySlug"/>
         <resources>
-            <resource ref="Honasa_Catalog::getUpSellProductsForProductById"/>
-        </resources>
-    </route>
-
-    <route url="/V1/products/:productId/related-products" method="GET">
-        <service class="Honasa\Catalog\Api\ProductDataInterface" method="getRelatedProductsForProductById"/>
-        <resources>
-            <resource ref="Honasa_Catalog::getRelatedProductsForProductById"/>
+            <resource ref="anonymous"/>
         </resources>
     </route>
 

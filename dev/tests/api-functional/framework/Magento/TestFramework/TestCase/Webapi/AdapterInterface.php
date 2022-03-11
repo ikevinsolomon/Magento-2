@@ -30,7 +30,7 @@ interface AdapterInterface
      *                                                             by test framework
      *     ),
      *     OR
-     *     'serviceInterface' => $phpServiceInterfaceName,      // e.g. \Magento\Catalog\Api\ProductInterface
+     *     'serviceInterface' => $phpServiceInterfaceName,      // e.g. \Magento\Catalog\Api\ProductResourceInterface
      *     'method' => $serviceMethodName                       // e.g. create
      *     'entityId' => $entityId                              // is used in REST route placeholder (if applicable)
      * );

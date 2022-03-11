@@ -1218,7 +1218,7 @@ QUERY;
                 'data' => $tierPrice
                 ]
             );
-            /** ProductInterface $product */
+            /** ProductResourceInterface $product */
             $product->setTierPrices($tierPrices);
             $product->save();
         }

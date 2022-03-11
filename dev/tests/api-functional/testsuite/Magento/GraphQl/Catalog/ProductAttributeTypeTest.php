@@ -41,7 +41,7 @@ class ProductAttributeTypeTest extends GraphQlAbstract
     }
     {
       attribute_code:"special_price",
-      entity_type:"Magento\\\\Catalog\\\\Api\\\\Data\\\\ProductInterface"
+      entity_type:"Magento\\\\Catalog\\\\Api\\\\Data\\\\ProductResourceInterface"
     }
   ]
   )

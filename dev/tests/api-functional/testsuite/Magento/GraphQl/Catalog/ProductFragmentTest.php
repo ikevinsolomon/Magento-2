@@ -33,7 +33,7 @@ query GetProduct {
   }
 }
 
-fragment BasicProductInformation on ProductInterface {
+fragment BasicProductInformation on ProductResourceInterface {
   sku
   name
   price {

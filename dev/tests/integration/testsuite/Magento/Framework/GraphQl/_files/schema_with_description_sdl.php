@@ -1067,7 +1067,7 @@ return [
                     'name' =>  null,
                     'ofType' =>  [
                         'kind' =>  'INTERFACE',
-                        'name' =>  'ProductInterface',
+                        'name' =>  'ProductResourceInterface',
                         'ofType' =>  null
                     ]
                 ],
@@ -1112,12 +1112,12 @@ return [
     ],
     [
         'kind'=> 'INTERFACE',
-        'name'=> 'ProductInterface',
-        'description'=> 'comment for ProductInterface',
+        'name'=> 'ProductResourceInterface',
+        'description'=> 'comment for ProductResourceInterface',
         'fields'=> [
             [
                 'name'=> 'url_key',
-                'description'=> 'comment for url_key inside ProductInterface type.',
+                'description'=> 'comment for url_key inside ProductResourceInterface type.',
                 'args'=> [
 
                 ],
@@ -1145,7 +1145,7 @@ return [
             ],
             [
                 'name'=> 'id',
-                'description'=> 'comment for [ProductInterface].',
+                'description'=> 'comment for [ProductResourceInterface].',
                 'args'=> [
 
                 ],
@@ -2299,7 +2299,7 @@ return [
             ],
             [
                 'name'=> 'url_key',
-                'description'=> 'comment for url_key for simple product that implements [ProductInterface]',
+                'description'=> 'comment for url_key for simple product that implements [ProductResourceInterface]',
                 'args'=> [
 
                 ],
@@ -2327,7 +2327,7 @@ return [
             ],
             [
                 'name'=> 'id',
-                'description'=> 'comment for [ProductInterface].',
+                'description'=> 'comment for [ProductResourceInterface].',
                 'args'=> [
 
                 ],
@@ -2606,7 +2606,7 @@ return [
         'interfaces'=> [
             [
                 'kind'=> 'INTERFACE',
-                'name'=> 'ProductInterface',
+                'name'=> 'ProductResourceInterface',
                 'ofType'=> null
             ],
             [
@@ -3889,7 +3889,7 @@ return [
             ],
             [
                 'name'=> 'url_key',
-                'description'=> 'comment for url_key inside ProductInterface type.',
+                'description'=> 'comment for url_key inside ProductResourceInterface type.',
                 'args'=> [
 
                 ],
@@ -3917,7 +3917,7 @@ return [
             ],
             [
                 'name'=> 'id',
-                'description'=> 'comment for [ProductInterface].',
+                'description'=> 'comment for [ProductResourceInterface].',
                 'args'=> [
 
                 ],
@@ -4196,7 +4196,7 @@ return [
         'interfaces'=> [
             [
                 'kind'=> 'INTERFACE',
-                'name'=> 'ProductInterface',
+                'name'=> 'ProductResourceInterface',
                 'ofType'=> null
             ],
             [

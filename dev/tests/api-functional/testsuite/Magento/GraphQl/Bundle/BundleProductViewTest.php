@@ -410,7 +410,7 @@ QUERY;
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage(
-            'GraphQL response contains errors: Cannot query field "qty" on type "ProductInterface".'
+            'GraphQL response contains errors: Cannot query field "qty" on type "ProductResourceInterface".'
         );
         $this->graphQlQuery($query);
     }
