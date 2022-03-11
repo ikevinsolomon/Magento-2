@@ -125,7 +125,7 @@ class CatalogProduct implements CatalogProductInterface
     }
 
 
-    public function getProductsByPage($pageNumber, $pageSize): array
+    public function getProductsByPage($pageNumber, $pageSize)
     {
         $response = [
             'status' => 200,
@@ -183,7 +183,7 @@ class CatalogProduct implements CatalogProductInterface
         $response = [
             'status' => 200,
             'resource' => self::CATALOG_PRODUCT_RESOURCE,
-            'message' => 'No Products Found',
+            'message' => 'No Product Found with url key',
             'data' => []
         ];
         try {
@@ -207,7 +207,7 @@ class CatalogProduct implements CatalogProductInterface
     }
 
 
-    public function getProductsByCategoryIds($categoryIds)
+    public function getCategoryDetailsById($categoryIds)
     {
         $response = [
             'status' => 200,

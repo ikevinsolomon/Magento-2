@@ -8,6 +8,14 @@
         </resources>
     </route>
 
+
+    <route url="/V1/catalog/products/:pageNumber/:pageSize" method="GET">
+        <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getProductsByPage"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
     <route url="/V1/catalog/products/:productId" method="GET">
         <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getProductsById"/>
         <resources>
@@ -24,8 +32,8 @@
     </route>
 
 
-    <route url="/V1/catalog/categories/:categoryIds" method="GET">
-        <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getProductsByCategoryIds"/>
+    <route url="/V1/catalog/categories/:categoryId" method="GET">
+        <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getCategoryDetailsById"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
