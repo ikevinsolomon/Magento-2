@@ -50,14 +50,21 @@
         </resources>
     </route>
 
-    <route url="/V1/catalog/categories/:categoryId/products" method="GET">
+    <route url="/V1/catalog/categories" method="GET">
+        <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getCategories"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/id/:categoryId/products" method="GET">
         <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getProductsByCategoryId"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
     </route>
 
-    <route url="/V1/catalog/categories/:categorySlug/products" method="GET">
+    <route url="/V1/catalog/categories/slug/:categorySlug/products" method="GET">
         <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getProductsByCategorySlug"/>
         <resources>
             <resource ref="anonymous"/>

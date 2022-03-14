@@ -14,8 +14,6 @@ interface CatalogProductInterface
      */
     public function getProducts();
 
-
-
     /**
      * Get list of products
      * @param int $pageNumber
@@ -25,8 +23,6 @@ interface CatalogProductInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getProductsByPage($pageNumber, $pageSize);
-
-
 
     /**
      * Get list of products
@@ -38,8 +34,6 @@ interface CatalogProductInterface
      */
     public function getProductsById($productId);
 
-
-
     /**
      * Get product by slug
      * @param string $productSlug
@@ -48,7 +42,6 @@ interface CatalogProductInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getProductsBySlug($productSlug);
-
 
     /**
      * Get list of upsell products by slug
@@ -59,7 +52,6 @@ interface CatalogProductInterface
      */
     public function getUpSellProductsBySlug($productSlug);
 
-
     /**
      * Get list of crosssell products by slug
      * @param string $productSlug
@@ -69,7 +61,6 @@ interface CatalogProductInterface
      */
     public function getCrossSellProductsBySlug($productSlug);
 
-
     /**
      * Get list of related products by slug
      * @param string $productSlug
@@ -78,6 +69,15 @@ interface CatalogProductInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getRelatedProductsBySlug($productSlug);
+
+    /**
+     * Get list of active categories
+     * @api
+     * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getCategories();
 
 
     /**

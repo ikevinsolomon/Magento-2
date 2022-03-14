@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/customer/register" method="POST">
+        <service class="Honasa\Customer\Api\CustomerEntityInterface" method="registerCustomer"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/:customerId" method="GET">
+        <service class="Honasa\Customer\Api\CustomerEntityInterface" method="getCustomerDetailsById"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/:customerId/orders" method="GET">
+        <service class="Honasa\Customer\Api\CustomerEntityInterface" method="getCustomerOrderDetailsById"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/:customerId/addresses" method="GET">
+        <service class="Honasa\Customer\Api\CustomerEntityInterface" method="getCustomerAddresses"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/:customerId/wallet-balance" method="GET">
+        <service class="Honasa\Customer\Api\CustomerEntityInterface" method="getCustomerWalletBalance"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+</routes>

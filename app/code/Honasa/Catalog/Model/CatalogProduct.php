@@ -29,7 +29,6 @@ class CatalogProduct implements CatalogProductInterface
         \Magento\Store\Model\StoreManagerInterface                      $storeManager,
         \Magento\Framework\Api\SearchCriteriaBuilder                    $searchCriteriaBuilder,
         \Magento\CatalogInventory\Model\Stock\StockItemRepository       $stockItemRepository,
-
         array                                                           $data = []
     )
     {
@@ -40,79 +39,6 @@ class CatalogProduct implements CatalogProductInterface
         $this->storeManager = $storeManager;
         $this->stockItemRepository = $stockItemRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-    }
-
-    /*
-     * Note calling productRepository adds almost 2s to API from 340ms to 2.6s
-     */
-    public function getProductMediaGallery($productSku)
-    {
-        $mediaGallery = [];
-        $mediaGalleryEntries = $this->productRepository->get($productSku)->getMediaGalleryEntries();
-        foreach ($mediaGalleryEntries as $media) {
-            $mediaGallery[] = $media->getData();
-        }
-        return $mediaGallery;
-    }
-
-    /*
-     * Note calling productRepository adds almost 2s to API from 340ms to 2.6s
-     */
-    public function getProductCustomAttributes($productSku)
-    {
-        $customAttributes = [];
-        $customAttributesEntries = $this->productRepository->get($productSku)->getCustomAttributes();
-        foreach ($customAttributesEntries as $customAttribute) {
-            $customAttributes[$customAttribute->getAttributeCode()] = $customAttribute->getValue();
-        }
-        return $customAttributes;
-    }
-
-    public function transformProduct($products)
-    {
-        $result = [];
-        if (isset($products) && count($products) > 0) {
-            foreach ($products as $product) {
-                $result[] = [
-                    'id' => (int)$product->getId(),
-                    'type' => $product->getTypeId(),
-                    'sku' => $product->getSku(),
-                    'name' => $product->getName(),
-                    'url_key' => $product->getUrlKey(),
-                    'image' => $product->getImage(),
-                    'small_image' => $product->getSmallImage(),
-                    'thumbnail' => $product->getThumbnail(),
-                    'price' => number_format($product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue(), 2, '.', ','),
-                    'is_in_stock' => $this->stockItemRepository->get($product->getId())->getIsInStock(),
-                    'qty' => $this->stockItemRepository->get($product->getId())->getQty(),
-                    'min_qty' => $this->stockItemRepository->get($product->getId())->getMinQty(),
-                    'min_sale_qty' => $this->stockItemRepository->get($product->getId())->getMinSaleQty(),
-                    'max_sale_qty' => $this->stockItemRepository->get($product->getId())->getMaxSaleQty(),
-                    'categories' => $product->getCategoryIds(),
-                    'position' => $product->getCatIndexPosition(),
-                    'created_at' => $product->getCreatedAt(),
-                    'updated_at' => $product->getUpdatedAt(),
-                ];
-            }
-        }
-        return $result;
-    }
-
-    public function transformCategory($categories)
-    {
-        $result = [];
-        if (isset($categories) && count($categories) > 0) {
-            foreach ($categories as $category) {
-                $result[] = [
-                    'id' => $category->getId(),
-                    'name' => $category->getName(),
-                    'url_key' => $category->getUrlKey(),
-                    'total_products' => $category->getProductCount(),
-                    'products' => $this->transformProduct($category->getProductCollection()->addAttributeToSelect('*')->addAttributeToSort('position'))
-                ];
-            }
-        }
-        return $result;
     }
 
     public function getProducts()
@@ -221,60 +147,6 @@ class CatalogProduct implements CatalogProductInterface
         }
     }
 
-    public function getProductsByCategoryId($categoryId)
-    {
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_CATEGORY_RESOURCE,
-            'message' => 'No Products in Category Found',
-            'data' => []
-        ];
-        try {
-            $categories = $this->categoryCollectionFactory->create();
-            $categories->addAttributeToSelect('*')->addFieldToFilter('entity_id', array('in' => $categoryId));
-            $categories->setStore($this->storeManager->getStore());
-            $categories->addAttributeToFilter('is_active', '1');
-            $categories = $this->transformCategory($categories);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_CATEGORY_RESOURCE,
-                'message' => 'success',
-                'data' => $categories
-            ];
-
-        } catch (Exception $e) {
-            return $response;
-        }
-    }
-
-    public function getProductsByCategorySlug($categorySlug)
-    {
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_CATEGORY_RESOURCE,
-            'message' => 'No Products in Category Found',
-            'data' => []
-        ];
-        try {
-            $categories = $this->categoryCollectionFactory->create();
-            $categories->addAttributeToSelect('*')->addFieldToFilter( [
-                ['attribute' => 'url_key', 'eq' => $categorySlug],
-            ]);
-            $categories->setStore($this->storeManager->getStore());
-            $categories->addAttributeToFilter('is_active', '1');
-            $categories = $this->transformCategory($categories);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_CATEGORY_RESOURCE,
-                'message' => 'success',
-                'data' => $categories
-            ];
-
-        } catch (Exception $e) {
-            return $response;
-        }
-    }
-
     public function getUpSellProductsBySlug($productSlug)
     {
         $response = [
@@ -357,5 +229,154 @@ class CatalogProduct implements CatalogProductInterface
         } catch (Exception $e) {
             return $response;
         }
+    }
+
+    public function getCategories()
+    {
+        $response = [
+            'status' => 200,
+            'resource' => self::CATALOG_CATEGORY_RESOURCE,
+            'message' => 'No Categories Found',
+            'data' => []
+        ];
+        try {
+            $categories = $this->categoryCollectionFactory->create();
+            $categories->addAttributeToSelect('*');
+            $categories->setStore($this->storeManager->getStore());
+            $categories->addAttributeToFilter('is_active', '1');
+            $categories = $this->transformCategory($categories);
+            return [
+                'status' => 200,
+                'resource' => self::CATALOG_CATEGORY_RESOURCE,
+                'message' => 'success',
+                'data' => $categories
+            ];
+
+        } catch (Exception $e) {
+            return $response;
+        }
+    }
+
+    public function getProductsByCategoryId($categoryId)
+    {
+        $response = [
+            'status' => 200,
+            'resource' => self::CATALOG_CATEGORY_RESOURCE,
+            'message' => 'No Products in Category Found',
+            'data' => []
+        ];
+        try {
+            $categories = $this->categoryCollectionFactory->create();
+            $categories->addAttributeToSelect('*')->addFieldToFilter('entity_id', array('in' => $categoryId));
+            $categories->setStore($this->storeManager->getStore());
+            $categories->addAttributeToFilter('is_active', '1');
+            $categories = $this->transformCategory($categories);
+            return [
+                'status' => 200,
+                'resource' => self::CATALOG_CATEGORY_RESOURCE,
+                'message' => 'success',
+                'data' => $categories
+            ];
+
+        } catch (Exception $e) {
+            return $response;
+        }
+    }
+
+    public function getProductsByCategorySlug($categorySlug)
+    {
+        $response = [
+            'status' => 200,
+            'resource' => self::CATALOG_CATEGORY_RESOURCE,
+            'message' => 'No Products in Category Found',
+            'data' => []
+        ];
+        try {
+            $categories = $this->categoryCollectionFactory->create();
+            $categories->addAttributeToSelect('*')->addFieldToFilter( [
+                ['attribute' => 'url_key', 'eq' => $categorySlug],
+            ]);
+            $categories->setStore($this->storeManager->getStore());
+            $categories->addAttributeToFilter('is_active', '1');
+            $categories = $this->transformCategory($categories);
+            return [
+                'status' => 200,
+                'resource' => self::CATALOG_CATEGORY_RESOURCE,
+                'message' => 'success',
+                'data' => $categories
+            ];
+
+        } catch (Exception $e) {
+            return $response;
+        }
+    }
+
+    public function getProductMediaGallery($productSku)
+    {
+        $mediaGallery = [];
+        $mediaGalleryEntries = $this->productRepository->get($productSku)->getMediaGalleryEntries();
+        foreach ($mediaGalleryEntries as $media) {
+            $mediaGallery[] = $media->getData();
+        }
+        return $mediaGallery;
+    }
+
+    public function getProductCustomAttributes($productSku)
+    {
+        $customAttributes = [];
+        $customAttributesEntries = $this->productRepository->get($productSku)->getCustomAttributes();
+        foreach ($customAttributesEntries as $customAttribute) {
+            $customAttributes[$customAttribute->getAttributeCode()] = $customAttribute->getValue();
+        }
+        return $customAttributes;
+    }
+
+    public function transformProduct($products)
+    {
+        $result = [];
+        if (isset($products) && count($products) > 0) {
+            foreach ($products as $product) {
+                $result[] = [
+                    'id' => (int)$product->getId(),
+                    'type' => $product->getTypeId(),
+                    'sku' => $product->getSku(),
+                    'name' => $product->getName(),
+                    'url_key' => $product->getUrlKey(),
+                    'image' => $product->getImage(),
+                    'small_image' => $product->getSmallImage(),
+                    'thumbnail' => $product->getThumbnail(),
+                    'price' => number_format($product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue(), 2, '.', ','),
+                    'is_in_stock' => $this->stockItemRepository->get($product->getId())->getIsInStock(),
+                    'qty' => $this->stockItemRepository->get($product->getId())->getQty(),
+                    'min_qty' => $this->stockItemRepository->get($product->getId())->getMinQty(),
+                    'min_sale_qty' => $this->stockItemRepository->get($product->getId())->getMinSaleQty(),
+                    'max_sale_qty' => $this->stockItemRepository->get($product->getId())->getMaxSaleQty(),
+                    'categories' => $product->getCategoryIds(),
+                    'media_gallery' => $this->getProductMediaGallery($product->getSku()),
+                    'position' => $product->getCatIndexPosition(),
+                    'created_at' => $product->getCreatedAt(),
+                    'updated_at' => $product->getUpdatedAt(),
+                ];
+            }
+        }
+        return $result;
+    }
+
+    public function transformCategory($categories)
+    {
+        $result = [];
+        if (isset($categories) && count($categories) > 0) {
+            foreach ($categories as $category) {
+                $result[] = [
+                    'id' => (int)$category->getId(),
+                    'name' => $category->getName(),
+                    'url_key' => $category->getUrlKey(),
+                    'image' => $category->getImage(),
+                    'total_products' => $category->getProductCount(),
+                    'products' => $this->transformProduct($category->getProductCollection()->addAttributeToSelect('*')->addAttributeToSort('position'))
+                ];
+            }
+        }
+        return $result;
     }
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Honasa_Customer
+ *
+ * @category  XML
+ * @package   Honasa\Customer
+ * @author    Honasa Consumer Pvt. Ltd
+ * @copyright 2021 Copyright (c) Honasa Consumer Pvt. Ltd
+ * @link      https://mamaearth.in/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Honasa\Customer\Api\CustomerEntityInterface" type="Honasa\Customer\Model\CustomerEntity"/>
+</config>
