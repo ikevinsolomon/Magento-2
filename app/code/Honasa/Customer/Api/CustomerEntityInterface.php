@@ -64,4 +64,16 @@ interface CustomerEntityInterface
     public function setCustomerAddress($customerId, $address);
 
 
+
+    /**
+     * Get customer details by Id
+     * @param int $customerId
+     * @param mixed $data
+     * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function setCustomerDetailsById($customerId, $data);
+
+
 }

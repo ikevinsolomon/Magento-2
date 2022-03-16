@@ -15,6 +15,14 @@
         </resources>
     </route>
 
+
+    <route url="/V1/customers/id/:customerId" method="POST">
+        <service class="Honasa\Customer\Api\CustomerEntityInterface" method="setCustomerDetailsById"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
     <route url="/V1/customers/id/:customerId/orders" method="GET">
         <service class="Honasa\Customer\Api\CustomerEntityInterface" method="getCustomerOrderDetailsById"/>
         <resources>
