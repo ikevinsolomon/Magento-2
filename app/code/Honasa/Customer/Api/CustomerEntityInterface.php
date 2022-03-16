@@ -56,12 +56,12 @@ interface CustomerEntityInterface
     /**
      * Get wallet balance by customer Id
      * @param int $customerId
-     * @param mixed[] $customerId
+     * @param mixed $address
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function setCustomerBillingAddress($customerId, $address);
+    public function setCustomerAddress($customerId, $address);
 
 
 }

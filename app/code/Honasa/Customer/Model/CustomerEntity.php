@@ -14,28 +14,33 @@ class CustomerEntity implements CustomerEntityInterface
     const CUSTOMER_ENTITY_RESOURCE = 'Customer_Entity';
     const CUSTOMER_ADDRESS_ENTITY_RESOURCE = 'Customer_Address_Entity';
     const CUSTOMER_ENTITY_SALES_ORDER_RESOURCE = 'Customer_Entity_Sales_Order';
+    const CUSTOMER_ENTITY_STORE_CREDIT = 'Customer_Entity_Store_Credit';
 
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
 
     public function __construct(
-        \Magento\Store\Model\StoreManagerInterface                 $storeManager,
-        \Magento\Framework\Api\SearchCriteriaBuilder               $searchCriteriaBuilder,
-        \Magento\Customer\Model\CustomerFactory                    $customerFactory,
-        \Magento\Customer\Model\ResourceModel\Customer\Collection  $customerCollection,
-        \Magento\Customer\Api\CustomerRepositoryInterface          $customerRepository,
-        \Magento\Customer\Model\AddressFactory                     $addressFactory,
-        \Magento\Customer\Api\AddressRepositoryInterface           $addressRepository,
-        \Magento\Integration\Model\Oauth\TokenFactory              $tokenModelFactory,
-        \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollection,
-        \Psr\Log\LoggerInterface                                   $logger,
-        \Magento\Framework\Math\Random                             $mathRandom,
-        \Magento\Framework\Intl\DateTimeFactory                    $dateTimeFactory,
-        array                                                      $data = []
+        \Magento\Store\Model\StoreManagerInterface                      $storeManager,
+        \Magento\Framework\Api\SearchCriteriaBuilder                    $searchCriteriaBuilder,
+        \Magento\Customer\Model\CustomerFactory                         $customerFactory,
+        \Magento\Customer\Model\ResourceModel\Customer\Collection       $customerCollection,
+        \Magento\Customer\Api\CustomerRepositoryInterface               $customerRepository,
+        \Magento\Customer\Model\AddressFactory                          $addressFactory,
+        \Magento\Customer\Api\Data\AddressInterfaceFactory              $addressInterfaceFactory,
+        \Magento\Customer\Api\AddressRepositoryInterface                $addressRepository,
+        \Magento\Customer\Api\Data\AddressInterfaceFactory              $addressDataFactory,
+
+        \Magento\Directory\Model\ResourceModel\Region\Collection        $regionCollection,
+        \Magento\Directory\Model\ResourceModel\Region\CollectionFactory $regionFactory,
+        \Magento\Integration\Model\Oauth\TokenFactory                   $tokenModelFactory,
+        \Magento\Sales\Model\ResourceModel\Order\CollectionFactory      $orderCollection,
+        \Psr\Log\LoggerInterface                                        $logger,
+        \Magento\Framework\Math\Random                                  $mathRandom,
+        \Magento\Framework\Intl\DateTimeFactory                         $dateTimeFactory,
+        array                                                           $data = []
     )
     {
         $this->storeManager = $storeManager;
-        $this->_storeManager = $storeManager;
         $this->customerFactory = $customerFactory;
         $this->customerRepository = $customerRepository;
         $this->tokenModelFactory = $tokenModelFactory;
@@ -46,6 +51,11 @@ class CustomerEntity implements CustomerEntityInterface
         $this->orderCollection = $orderCollection;
         $this->logger = $logger;
         $this->addressRepository = $addressRepository;
+        $this->addressInterfaceFactory = $addressInterfaceFactory;
+        $this->addressDataFactory = $addressDataFactory;
+
+        $this->regionCollection = $regionCollection;
+        $this->regionFactory = $regionFactory;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
@@ -64,7 +74,7 @@ class CustomerEntity implements CustomerEntityInterface
             $mobileNumber = $data['mobile_number'];
             $email = $data['email'];
             $gender = $data['gender'];
-            $websiteId = $this->_storeManager->getStore()->getWebsiteId();
+            $websiteId = $this->storeManager->getStore()->getWebsiteId();
 
             if (
                 isset($email) &&
@@ -225,10 +235,9 @@ class CustomerEntity implements CustomerEntityInterface
         ];
         try {
             $addressesList = [];
-            $searchCriteria = $this->searchCriteriaBuilder->addFilter(
-                'parent_id', $customerId)->create();
-            $addressRepository = $this->addressRepository->getList($searchCriteria);
-            foreach ($addressRepository->getItems() as $address) {
+            $customer = $this->customerRepository->getById($customerId);
+            $customerAddresses = $customer->getAddresses();
+            foreach ($customerAddresses as $address) {
                 $addressesList[] = [
                     'firstname' => $address->getFirstname(),
                     'middlename' => $address->getMiddlename(),
@@ -238,10 +247,12 @@ class CustomerEntity implements CustomerEntityInterface
                     'state' => $address->getRegion()->getRegion(),
                     'pincode' => $address->getPostcode(),
                     'contact_phone' => $address->getTelephone(),
+                    'is_default_billing' => $address->isDefaultBilling() === true,
+                    'is_default_shipping' => $address->isDefaultShipping() === true
                 ];
             }
-            $response['data'] = $addressesList;
             $response['message'] = 'success';
+            $response['data'] = $addressesList;
         } catch (Exception $exception) {
             $this->logger->error($exception->getMessage());
         }
@@ -250,11 +261,103 @@ class CustomerEntity implements CustomerEntityInterface
 
     public function getCustomerWalletBalance($customerId)
     {
-        // TODO: Implement getCustomerWalletBalance() method.
+        $response = [
+            'status' => 200,
+            'resource' => self::CUSTOMER_ENTITY_STORE_CREDIT,
+            'message' => 'Unable to retrieve customer store credit',
+            'data' => []
+        ];
+
+        return $response;
     }
 
-    public function setCustomerBillingAddress($customerId, $address)
+    public function setCustomerAddress($customerId, $address)
     {
-        // TODO: Implement setCustomerBillingAddress() method.
+        $response = [
+            'status' => 200,
+            'resource' => self::CUSTOMER_ADDRESS_ENTITY_RESOURCE,
+            'message' => 'setCustomerAddress',
+            'data' => []
+        ];
+
+        try {
+
+            $firstName = $address['firstname'];
+            $lastName = $address['lastname'];
+            $mobileNumber = $address['mobile_number'];
+            $streetLineOne = $address['street_line_one'];
+            $streetLineTwo = $address['street_line_two'];
+            $city = $address['city'];
+            $region = $address['state'];
+            $postCode = $address['pincode'];
+            $isDefaultBilling = $address['is_default_billing'];
+            $isDefaultShipping = $address['is_default_shipping'];
+            if (
+                isset($firstName) &&
+                isset($lastName) &&
+                isset($mobileNumber) &&
+                isset($streetLineOne) &&
+                isset($streetLineTwo) &&
+                isset($city) &&
+                isset($region) &&
+                isset($postCode)
+
+            ) {
+
+                $firstName = $address['firstname'];
+                $lastName = $address['lastname'];
+                $mobileNumber = $address['mobile_number'];
+                $streetLineOne = $address['street_line_one'];
+                $streetLineTwo = $address['street_line_two'];
+                $city = $address['city'];
+                $region = $address['state'];
+                $postCode = $address['pincode'];
+                if (
+                    isset($firstName) &&
+                    isset($lastName) &&
+                    isset($mobileNumber) &&
+                    isset($streetLineOne) &&
+                    isset($streetLineTwo) &&
+                    isset($city) &&
+                    isset($region) &&
+                    isset($postCode)
+
+                ) {
+                    $addressEntry = $this->addressDataFactory->create();
+                    $addressEntry->setFirstname($firstName);
+                    $addressEntry->setLastname($lastName);
+                    $addressEntry->setTelephone($mobileNumber);
+
+                    $street[] = $streetLineOne;
+                    $street[] = $streetLineTwo;
+                    $addressEntry->setStreet($street);
+                    $addressEntry->setCity($city);
+                    $addressEntry->setPostcode($postCode);
+
+                    $regionInfo = $this->regionFactory->create()
+                        ->addRegionNameFilter($region)
+                        ->getFirstItem()
+                        ->toArray();
+                    $addressEntry->setRegionId($regionInfo['region_id']);
+                    $addressEntry->setCountryId($regionInfo['country_id']);
+                    $addressEntry->setIsDefaultBilling($isDefaultBilling);
+                    $addressEntry->setIsDefaultShipping($isDefaultShipping);
+                    $addressEntry->setCustomerId($customerId);
+                    $this->addressRepository->save($addressEntry);
+                    $response['message'] = 'Customer address saved';
+                    $response['data'] = $address;
+                    return $response;
+                }
+
+                return $response;
+            }
+
+            return $response;
+        } catch (Exception $exception) {
+            $this->logger->error($exception->getMessage());
+        }
+        $response['message'] = 'Either address[firstname|lastname|mobile_number|street_line_one|street_line_two|city|state|pincode] missing';
+        return $response;
+
     }
 }
