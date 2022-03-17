@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <listingToolbar name="listing_top">
+        <filters name="listing_filters">
+            <filterSelect name="stock_status">
+                <argument name="optionsProvider" xsi:type="configurableObject">
+                    <argument name="class" xsi:type="string">Honasa\Catalog\Ui\Component\Listing\Columns\StockStatus\Options</argument>
+                </argument>
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="provider" xsi:type="string">${ $.parentName }</item>
+                        <item name="dataScope" xsi:type="string">stock_status</item>
+                        <item name="label" xsi:type="string" translate="true">Stock Status</item>
+                    </item>
+                </argument>
+            </filterSelect>
+        </filters>
+    </listingToolbar>
+    <columns name="product_columns">
+        <column name="stock_status">
+            <argument name="data" xsi:type="array">
+                <item name="options" xsi:type="object">Honasa\Catalog\Ui\Component\Listing\Columns\StockStatus\Options</item>
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">select</item>
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/select</item>
+                    <item name="add_field" xsi:type="boolean">true</item>
+                    <item name="dataType" xsi:type="string">select</item>
+                    <item name="label" xsi:type="string" translate="true">Stock Status</item>
+                </item>
+            </argument>
+        </column>
+    </columns>
+</listing>

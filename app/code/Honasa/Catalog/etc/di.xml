@@ -4,4 +4,7 @@
     <type name="Magento\Framework\Webapi\ServiceOutputProcessor">
         <plugin name="honasa_catalog_plugin" type="Honasa\Catalog\Plugin\ServiceOutputProcessorPlugin"/>
     </type>
+    <type name="Magento\Catalog\Ui\DataProvider\Product\ProductDataProvider">
+        <plugin name="join_product_grid_with_stock_status" type="Honasa\Catalog\Plugin\Ui\DataProvider\Product\ProductDataProvider" sortOrder="100" />
+    </type>
 </config>
