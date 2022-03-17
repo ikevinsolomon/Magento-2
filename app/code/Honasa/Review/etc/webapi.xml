@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2016 iPragmatech. All rights reserved.
+ * See COPYING.txt for license details.
+ * Contributor Author : Manish Kumar
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <route url="/V1/reviews/products/id/:productId" method="GET">
+        <service class="Honasa\Review\Api\ReviewInterface" method="getReviewsList"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+    <route url="/V1/reviews/ratings/:store_id" method="GET">
+        <service class="Honasa\Review\Api\ReviewInterface" method="getRatings"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+    <route url="/V1/reviews/customer/post" method="POST">
+        <service class="Honasa\Review\Api\ReviewInterface" method="writeReviews"/>
+        <resources>
+            <resource ref="Ipragmatech_Ipreview::writeReviews"/>
+        </resources>
+    </route>
+    <route url="/V1/reviews/guest/post" method="POST">
+        <service class="Honasa\Review\Api\ReviewInterface" method="writeReviews"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+</routes>
