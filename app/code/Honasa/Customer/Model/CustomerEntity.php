@@ -16,6 +16,7 @@ class CustomerEntity implements CustomerEntityInterface
     const CUSTOMER_ENTITY_SALES_ORDER_RESOURCE = 'Customer_Entity_Sales_Order';
     const CUSTOMER_ENTITY_STORE_CREDIT = 'Customer_Entity_Store_Credit';
     const RESPONSE_MESSAGE_SUCCESS = 'success';
+    const RESPONSE_MESSAGE_FAILURE = 'failure';
 
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
@@ -155,6 +156,7 @@ class CustomerEntity implements CustomerEntityInterface
             }
             return $response;
         } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
             throw new \Magento\Framework\Exception\LocalizedException(
                 __('Customer Registration Failed')
             );
@@ -185,6 +187,7 @@ class CustomerEntity implements CustomerEntityInterface
             ];
             return $response;
         } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
             return $response;
         }
         return $response;
@@ -205,6 +208,7 @@ class CustomerEntity implements CustomerEntityInterface
                 'contact_phone' => $address['telephone'],
             ];
         } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
             return new \stdClass();
         }
     }
@@ -224,6 +228,7 @@ class CustomerEntity implements CustomerEntityInterface
             $response['data'] = $customerOrder->getData();
             return $response;
         } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
             return $response;
         }
         return $response;
@@ -369,10 +374,11 @@ class CustomerEntity implements CustomerEntityInterface
     {
         $response = [
             'status' => 200,
-            'resource' => self::CUSTOMER_ADDRESS_ENTITY_RESOURCE,
-            'message' => 'setCustomerAddress',
+            'resource' => self::CUSTOMER_ENTITY_RESOURCE,
+            'message' => 'Update Customer Details Failed',
             'data' => []
         ];
+
         $customerRepository = $this->customerRepository->getById($customerId);
         $customerEmail = $customerRepository->getEmail();
 
@@ -384,12 +390,14 @@ class CustomerEntity implements CustomerEntityInterface
         if ($update) {
             $customerFactory->setWebsiteId($websiteId)->loadByEmail($customerEmail);
         }
+
         $customerFactory->setWebsiteId($websiteId)
             ->setStore($store)
             ->setFirstname($data['firstname'])
             ->setLastname($data['lastname'])
             ->setForceConfirmed(true);
 
+        // Gender
         switch (strtoupper($data['gender'])) {
             case 'FEMALE':
                 $customerFactory->setGender(2);
@@ -401,9 +409,10 @@ class CustomerEntity implements CustomerEntityInterface
                 $customerFactory->setGender(0);
                 break;
         }
+
         $dob = $data['dob'];
         if (!empty($dob)) {
-            $customerFactory->setDob($dob);
+            $customerFactory->setDob(date("Y-m-d", strtotime($dob)));
         }
         try {
             //update customer
@@ -420,9 +429,11 @@ class CustomerEntity implements CustomerEntityInterface
             ];
             return $response;
         } catch (AlreadyExistsException $e) {
-            throw new AlreadyExistsException(__($e->getMessage()), $e);
+            $this->logger->error($e->getMessage());
+            return $response;
         } catch (\Exception $e) {
-            throw new \RuntimeException(__($e->getMessage()));
+            $this->logger->error($e->getMessage());
+            return $response;
         }
 
     }
