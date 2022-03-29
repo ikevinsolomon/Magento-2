@@ -4,7 +4,13 @@ namespace Honasa\Customer\Model;
 
 use Exception;
 use Honasa\Customer\Api\CustomerEntityInterface;
+use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Event\ManagerInterface;
+use Magento\Framework\Exception\AuthenticationException;
+use Magento\Integration\Model\CredentialsValidator;
+use Magento\Integration\Model\Oauth\Token\RequestThrottler;
+use Magento\Integration\Model\ResourceModel\Oauth\Token\CollectionFactory as TokenCollectionFactory;
 
 /**
  * Defines the implementaiton class of the calculator service contract.
@@ -40,6 +46,10 @@ class CustomerEntity implements CustomerEntityInterface
         \Magento\Framework\Math\Random                                  $mathRandom,
         \Magento\Framework\Intl\DateTimeFactory                         $dateTimeFactory,
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface            $timezone,
+        AccountManagementInterface                                      $accountManagement,
+        TokenCollectionFactory                                          $tokenModelCollectionFactory,
+        CredentialsValidator                                            $validatorHelper,
+        ManagerInterface                                                $eventManager = null,
         array                                                           $data = []
     )
     {
@@ -59,8 +69,14 @@ class CustomerEntity implements CustomerEntityInterface
         $this->regionCollection = $regionCollection;
         $this->regionFactory = $regionFactory;
         $this->timezone = $timezone;
+        $this->accountManagement = $accountManagement;
+        $this->tokenModelCollectionFactory = $tokenModelCollectionFactory;
+        $this->validatorHelper = $validatorHelper;
         $this->customerResource = $customerResource;
+        $this->eventManager = $eventManager ?: \Magento\Framework\App\ObjectManager::getInstance()
+            ->get(ManagerInterface::class);
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+
     }
 
     public function registerCustomer($data)
@@ -73,8 +89,8 @@ class CustomerEntity implements CustomerEntityInterface
         ];
 
         try {
-            $firstName = $data['firstName'];
-            $lastName = $data['lastName'];
+            $firstName = $data['firstname'];
+            $lastName = $data['lastname'];
             $mobileNumber = $data['mobile_number'];
             $email = $data['email'];
             $gender = $data['gender'];
@@ -434,6 +450,39 @@ class CustomerEntity implements CustomerEntityInterface
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             return $response;
+        }
+
+    }
+
+    public function loginCustomer($username, $password)
+    {
+        $response = [
+            'status' => 200,
+            'resource' => self::CUSTOMER_ENTITY_RESOURCE,
+            'message' => self::RESPONSE_MESSAGE_FAILURE,
+            'data' => []
+        ];
+        $this->validatorHelper->validate($username, $password);
+        $this->getRequestThrottler()->throttle($username, RequestThrottler::USER_TYPE_CUSTOMER);
+        try {
+
+            $customerDataObject = $this->accountManagement->authenticate($username, $password);
+            $this->eventManager->dispatch('customer_login', ['customer' => $customerDataObject]);
+            $this->getRequestThrottler()->resetAuthenticationFailuresCount($username, RequestThrottler::USER_TYPE_CUSTOMER);
+            $response['status'] = self::RESPONSE_MESSAGE_SUCCESS;
+            $response['data'] = [
+                'me' => $this->tokenModelFactory->create()->createCustomerToken($customerDataObject->getId())->getToken()
+            ];
+
+            return $response;
+        } catch (\Exception $e) {
+            $this->getRequestThrottler()->logAuthenticationFailure($username, RequestThrottler::USER_TYPE_CUSTOMER);
+            throw new AuthenticationException(
+                __(
+                    'The account sign-in was incorrect or your account is disabled temporarily. '
+                    . 'Please wait and try again later.'
+                )
+            );
         }
 
     }

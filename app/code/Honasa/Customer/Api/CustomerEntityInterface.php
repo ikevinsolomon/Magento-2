@@ -15,6 +15,18 @@ interface CustomerEntityInterface
      */
     public function registerCustomer($data);
 
+
+    /**
+     * Login Customer
+     * @api
+     * @param string $username
+     * @param string $password
+     * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException If product with the specified ID does not exist.
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function loginCustomer($username, $password);
+
     /**
      * Get customer details by Id
      * @param int $customerId

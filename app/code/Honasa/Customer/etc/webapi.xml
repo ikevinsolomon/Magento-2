@@ -8,6 +8,13 @@
         </resources>
     </route>
 
+    <route url="/V1/customers/login" method="POST">
+        <service class="Honasa\Customer\Api\CustomerEntityInterface" method="loginCustomer"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
     <route url="/V1/customers/id/:customerId" method="GET">
         <service class="Honasa\Customer\Api\CustomerEntityInterface" method="getCustomerDetailsById"/>
         <resources>

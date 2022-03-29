@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * @author Amasty Team
+ * @copyright Copyright (c) 2021 Amasty (https://www.amasty.com)
+ * @package Amasty_Rules
+ */
+-->
+
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+        <fieldset name="rule_information" sortOrder="10">
+            <field name="platform_used" formElement="select">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">platform_used</item>
+                    </item>
+                </argument>
+                <settings>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <dataType>number</dataType>
+                    <label translate="true">Platform coupon is used</label>
+                    <visible>true</visible>
+                    <dataScope>platform_used</dataScope>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options>
+                                <option name="0" xsi:type="array">
+                                    <item name="value" xsi:type="number">1</item>
+                                    <item name="label" xsi:type="string" translate="true">Website</item>
+                                </option>
+                                <option name="1" xsi:type="array">
+                                    <item name="value" xsi:type="number">2</item>
+                                    <item name="label" xsi:type="string" translate="true">Mobile Application</item>
+                                </option>
+                                <option name="2" xsi:type="array">
+                                    <item name="value" xsi:type="number">3</item>
+                                    <item name="label" xsi:type="string" translate="true">Both</item>
+                                </option>
+                            </options>
+                        </settings>
+                    </select>
+                </formElements>
+        </field>
+    </fieldset>
+</form>
