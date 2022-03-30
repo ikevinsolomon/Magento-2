@@ -1,0 +1,23 @@
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <fieldset name="display_settings">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="visible" xsi:type="boolean">false</item>
+            </item>
+        </argument>
+    </fieldset>
+    <fieldset name="design">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="visible" xsi:type="boolean">false</item>
+            </item>
+        </argument>
+    </fieldset>
+    <fieldset name="schedule_design_update">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="visible" xsi:type="boolean">false</item>
+            </item>
+        </argument>
+    </fieldset>
+</form>
