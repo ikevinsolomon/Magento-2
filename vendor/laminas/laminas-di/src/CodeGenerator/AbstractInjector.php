@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-di for the canonical source repository
- * @copyright https://github.com/laminas/laminas-di/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-di/blob/master/LICENSE.md New BSD License
- */
-
 declare(strict_types=1);
 
 namespace Laminas\Di\CodeGenerator;
@@ -68,13 +62,18 @@ abstract class AbstractInjector implements InjectorInterface
 
     public function canCreate(string $name): bool
     {
-        return isset($this->factories[$name]) || $this->injector->canCreate($name);
+        return $this->hasFactory($name) || $this->injector->canCreate($name);
+    }
+
+    private function hasFactory(string $name): bool
+    {
+        return isset($this->factories[$name]);
     }
 
     /** @return mixed */
     public function create(string $name, array $options = [])
     {
-        if (isset($this->factories[$name])) {
+        if ($this->hasFactory($name)) {
             return $this->getFactory($name)->create($this->container, $options);
         }
 

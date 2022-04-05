@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-di for the canonical source repository
- * @copyright https://github.com/laminas/laminas-di/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-di/blob/master/LICENSE.md New BSD License
- */
-
 declare(strict_types=1);
 
 namespace Laminas\Di\CodeGenerator;
@@ -40,7 +34,7 @@ trait GeneratorTrait
         if (! is_dir($dir) && ! mkdir($dir, $this->mode, true)) {
             throw new GenerateCodeException(sprintf(
                 'Could not create output directory: %s',
-                $this->outputDirectory
+                $dir
             ));
         }
     }

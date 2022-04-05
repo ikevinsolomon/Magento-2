@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-di for the canonical source repository
- * @copyright https://github.com/laminas/laminas-di/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-di/blob/master/LICENSE.md New BSD License
- */
-
 declare(strict_types=1);
 
 namespace Laminas\Di;
@@ -20,7 +14,7 @@ use function is_array;
 /**
  * Provides a DI configuration from an array.
  *
- * This configures the instanciation process of the dependency injector.
+ * This configures the instantiation process of the dependency injector.
  *
  * **Example:**
  *
@@ -33,17 +27,17 @@ use function is_array;
  *         // the types the dependency injector should prefer.
  *         Some\Interface::class => Some\Preference::class
  *     ],
- *     // This configures the instanciation of specific types.
+ *     // This configures the instantiation of specific types.
  *     // Types may also be purely virtual by defining the aliasOf key.
  *     'types' => [
  *         My\Class::class => [
  *              'preferences' => [
  *                  // this supercedes the global type preferences
- *                  // when My\Class is instanciated
+ *                  // when My\Class is instantiated
  *                  Some\Interface::class => 'My.SpecificAlias'
  *              ],
  *
- *              // Instanciation paramters. These will only be used for
+ *              // instantiation paramters. These will only be used for
  *              // the instantiator (i.e. the constructor)
  *              'parameters' => [
  *                  'foo' => My\FooImpl::class, // Use the given type to provide the injection (depends on definition)
@@ -100,8 +94,8 @@ class Config implements ConfigInterface
     public function __construct($options = [])
     {
         $this->ensureArrayOrArrayAccess($options);
-        $this->preferences = $this->getDataFromArray($options, 'preferences') ?: [];
-        $this->types       = $this->getDataFromArray($options, 'types') ?: [];
+        $this->preferences = $this->getDataFromArray($options, 'preferences');
+        $this->types       = $this->getDataFromArray($options, 'types');
     }
 
     /**
@@ -128,7 +122,7 @@ class Config implements ConfigInterface
     }
 
     /**
-     * Returns the instanciation paramters for the given type
+     * Returns the instantiation paramters for the given type
      *
      * @param string $type The alias or class name
      * @return array The configured parameters

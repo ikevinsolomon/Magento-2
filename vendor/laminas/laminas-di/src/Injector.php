@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-di for the canonical source repository
- * @copyright https://github.com/laminas/laminas-di/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-di/blob/master/LICENSE.md New BSD License
- */
-
 declare(strict_types=1);
 
 namespace Laminas\Di;
@@ -169,9 +163,9 @@ class Injector implements InjectorInterface
             ));
         }
 
-        if (! class_exists($class) || interface_exists($class)) {
+        if (! class_exists($class)) {
             throw new ClassNotFoundException(sprintf(
-                'Class or interface by name %s does not exist',
+                'Class by name %s does not exist',
                 $class
             ));
         }
