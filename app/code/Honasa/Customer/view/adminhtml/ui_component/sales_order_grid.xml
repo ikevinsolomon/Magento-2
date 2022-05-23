@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Honasa_Customer
+ *
+ * @category  XML
+ * @package   Honasa\Customer
+ * @author    Honasa Consumer Pvt. Ltd
+ * @copyright 2022 Copyright (c) Honasa Consumer Pvt Ltd
+ * @link      https://www.mamaearth.in/
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <columns name="sales_order_columns">
+        <column name="telephone" class="Honasa\Customer\Ui\Component\Listing\Column\Telephone">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Mobile Number</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="customer_email" class="Honasa\Customer\Ui\Component\Listing\Column\CustomerEmail">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Customer Email</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+    </columns>
+</listing>

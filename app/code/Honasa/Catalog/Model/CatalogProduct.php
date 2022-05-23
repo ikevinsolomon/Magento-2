@@ -5,6 +5,17 @@ namespace Honasa\Catalog\Model;
 use Exception;
 use Honasa\Catalog\Api\CatalogProductInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
+use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\CatalogInventory\Model\Stock\StockItemRepository;
+use Honasa\Base\Model\Data\ResponseFactory;
+use Honasa\Base\Helper\CatalogHelper;
+use Honasa\Catalog\Helper\Tree;
+use Psr\Log\LoggerInterface;
+use Magento\Catalog\Model\Category;
 
 
 /**
@@ -22,16 +33,19 @@ class CatalogProduct implements CatalogProductInterface
     protected $product;
 
     public function __construct(
-        \Magento\Catalog\Model\Product                                  $product,
-        \Magento\Catalog\Api\ProductRepositoryInterface                 $productRepository,
-        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollectionFactory,
-        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
-        \Magento\Store\Model\StoreManagerInterface                      $storeManager,
-        \Magento\Framework\Api\SearchCriteriaBuilder                    $searchCriteriaBuilder,
-        \Magento\CatalogInventory\Model\Stock\StockItemRepository       $stockItemRepository,
-        array                                                           $data = []
-    )
-    {
+        Product $product,
+        ProductRepositoryInterface $productRepository,
+        ProductCollectionFactory $productCollectionFactory,
+        CategoryCollectionFactory $categoryCollectionFactory,
+        StoreManagerInterface  $storeManager,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        StockItemRepository $stockItemRepository,
+        ResponseFactory $responseFactory,
+        CatalogHelper $catalogHelper,
+        Tree $tree,
+        LoggerInterface $logger,
+        Category $category
+    ){
         $this->product = $product;
         $this->productRepository = $productRepository;
         $this->productCollectionFactory = $productCollectionFactory;
@@ -39,41 +53,37 @@ class CatalogProduct implements CatalogProductInterface
         $this->storeManager = $storeManager;
         $this->stockItemRepository = $stockItemRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->responseFactory = $responseFactory;
+        $this->catalogHelper = $catalogHelper;
+        $this->tree = $tree;
+        $this->logger = $logger;
+        $this->category = $category;
     }
 
     public function getProducts()
     {
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_PRODUCT_RESOURCE,
-            'message' => 'No Products Found',
-            'data' => []
-        ];
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_PRODUCT_RESOURCE);
 
         try {
             $products = $this->productCollectionFactory->create();
             $products->addAttributeToSelect('*');
-            $products = $this->transformProduct($products);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_PRODUCT_RESOURCE,
-                'message' => 'success',
-                'data' => $products
-            ];
+            $products = $this->catalogHelper->transformProduct($products);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($products);
+            return (array) $response;
 
         } catch (Exception $e) {
-            return $response;
+            $response->setMessage($e->getMessage());
         }
+        return $response;
     }
 
     public function getProductsByPage($pageNumber, $pageSize)
     {
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_PRODUCT_RESOURCE,
-            'message' => 'No Products Found',
-            'data' => []
-        ];
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_PRODUCT_RESOURCE);
 
         try {
             $products = $this->productCollectionFactory->create();
@@ -81,52 +91,41 @@ class CatalogProduct implements CatalogProductInterface
             $products->setPageSize($pageSize);
             $products->setPageSize($pageSize);
             $products->setCurPage($pageNumber);
-            $products = $this->transformProduct($products);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_PRODUCT_RESOURCE,
-                'message' => 'success',
-                'data' => $products
-            ];
+            $products = $this->catalogHelper->transformProduct($products);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($products);
+            return (array)$response;
 
         } catch (Exception $e) {
-            return $response;
+            $response->setMessage($e->getMessage());
         }
+        return $response;
     }
 
     public function getProductsById($productId)
     {
 
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_PRODUCT_RESOURCE,
-            'message' => 'No Products Found',
-            'data' => []
-        ];
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_PRODUCT_RESOURCE);
         try {
-            $products = $this->productCollectionFactory->create();
-            $products->addAttributeToSelect('*')->addFieldToFilter('entity_id', array('in' => $productId));
-            $products = $this->transformProduct($products);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_PRODUCT_RESOURCE,
-                'message' => 'success',
-                'data' => $products
-            ];
+            $product = $this->productRepository->getById($productId);
+            $product = $this->catalogHelper->transformSingleProduct($product);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($product);
+            return (array)$response;
 
         } catch (Exception $e) {
-            return $response;
+            $response->setMessage($e->getMessage());
         }
+        return $response;
     }
 
     public function getProductsBySlug($productSlug)
     {
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_PRODUCT_RESOURCE,
-            'message' => 'No Product Found with url key',
-            'data' => []
-        ];
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_PRODUCT_RESOURCE);
         try {
             $products = $this->productCollectionFactory->create();
             $products->addAttributeToSelect('*')->addAttributeToFilter(
@@ -134,27 +133,22 @@ class CatalogProduct implements CatalogProductInterface
                     ['attribute' => 'url_key', 'eq' => $productSlug],
                 ]
             );
-            $products = $this->transformProduct($products);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_PRODUCT_RESOURCE,
-                'message' => 'success',
-                'data' => $products
-            ];
+            $products = $this->catalogHelper->transformProduct($products);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($products);
+            return (array) $response;
 
         } catch (Exception $e) {
-            return $response;
+            $response->setMessage($e->getMessage());
         }
+        return $response;
     }
 
     public function getUpSellProductsBySlug($productSlug)
     {
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_PRODUCT_RESOURCE,
-            'message' => 'No Products Found',
-            'data' => []
-        ];
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_PRODUCT_RESOURCE);
         try {
             $products = $this->productCollectionFactory->create();
             $products->addAttributeToSelect('*')->addAttributeToFilter(
@@ -162,27 +156,22 @@ class CatalogProduct implements CatalogProductInterface
                     ['attribute' => 'url_key', 'eq' => $productSlug],
                 ]
             );
-            $upSellProducts = $products->getFirstItem()->getUpSellProductCollection()->addAttributeToSelect('*');
-            $upSellProducts = $this->transformProduct($upSellProducts);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_PRODUCT_RESOURCE,
-                'message' => 'success',
-                'data' => $upSellProducts
-            ];
+            $products = $products->getFirstItem()->getUpSellProductCollection()->addAttributeToSelect('*');
+            $products = $this->catalogHelper->transformProduct($products);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($products);
+            return (array) $response;
         } catch (Exception $e) {
-            return $response;
+            $response->setMessage($e->getMessage());
         }
+        return $response;
     }
 
     public function getCrossSellProductsBySlug($productSlug)
     {
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_PRODUCT_RESOURCE,
-            'message' => 'No Products Found',
-            'data' => []
-        ];
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_PRODUCT_RESOURCE);
         try {
             $products = $this->productCollectionFactory->create();
             $products->addAttributeToSelect('*')->addAttributeToFilter(
@@ -190,27 +179,22 @@ class CatalogProduct implements CatalogProductInterface
                     ['attribute' => 'url_key', 'eq' => $productSlug],
                 ]
             );
-            $crossSell = $products->getFirstItem()->getCrossSellProductCollection()->addAttributeToSelect('*');
-            $crossSell = $this->transformProduct($crossSell);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_PRODUCT_RESOURCE,
-                'message' => 'success',
-                'data' => $crossSell
-            ];
+            $products = $products->getFirstItem()->getCrossSellProductCollection()->addAttributeToSelect('*');
+            $products = $this->catalogHelper->transformProduct($products);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($products);
+            return (array) $response;
         } catch (Exception $e) {
-            return $response;
+            $response->setMessage($e->getMessage());
         }
+        return $response;
     }
 
     public function getRelatedProductsBySlug($productSlug)
     {
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_PRODUCT_RESOURCE,
-            'message' => 'No Products Found',
-            'data' => []
-        ];
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_PRODUCT_RESOURCE);
         try {
             $products = $this->productCollectionFactory->create();
             $products->addAttributeToSelect('*')->addAttributeToFilter(
@@ -218,79 +202,123 @@ class CatalogProduct implements CatalogProductInterface
                     ['attribute' => 'url_key', 'eq' => $productSlug],
                 ]
             );
-            $relatedProducts = $products->getFirstItem()->getRelatedProductCollection()->addAttributeToSelect('*');
-            $relatedProducts = $this->transformProduct($relatedProducts);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_PRODUCT_RESOURCE,
-                'message' => 'success',
-                'data' => $relatedProducts
-            ];
+            $products = $products->getFirstItem()->getRelatedProductCollection()->addAttributeToSelect('*');
+            $products = $this->catalogHelper->transformProduct($products);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($products);
+            return (array) $response;
         } catch (Exception $e) {
-            return $response;
+            $response->setMessage($e->getMessage());
         }
+        return $response;
+    }
+
+    public function getUpSellProductsById($productId)
+    {
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_PRODUCT_RESOURCE);
+        try {
+            $product = $this->productCollectionFactory->create();
+            $product->addAttributeToSelect('*')->addAttributeToFilter(
+                [
+                    ['attribute' => 'entity_id', 'eq' => $productId],
+                ]
+            );
+            $products = $product->getFirstItem()->getUpSellProductCollection()->addAttributeToSelect('*');
+            $products = $this->catalogHelper->transformProduct($products);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($products);
+            return (array) $response;
+        } catch (Exception $e) {
+            $response->setMessage($e->getMessage());
+        }
+        return $response;
+    }
+
+    public function getCrossSellProductsById($productId)
+    {
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_PRODUCT_RESOURCE);
+        try {
+            $product = $this->productCollectionFactory->create();
+            $product->addAttributeToSelect('*')->addAttributeToFilter(
+                [
+                    ['attribute' => 'entity_id', 'eq' => $productId],
+                ]
+            );
+            $products = $product->getFirstItem()->getCrossSellProductCollection()->addAttributeToSelect('*');
+            $products = $this->catalogHelper->transformProduct($products);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($products);
+            return (array) $response;
+        } catch (Exception $e) {
+            $response->setMessage($e->getMessage());
+        }
+        return $response;
+    }
+
+    public function getRelatedProductsById($productId)
+    {
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_PRODUCT_RESOURCE);
+        try {
+            $product = $this->productCollectionFactory->create();
+            $product->addAttributeToSelect('*')->addAttributeToFilter(
+                [
+                    ['attribute' => 'entity_id', 'eq' => $productId],
+                ]
+            );
+            $products = $product->getFirstItem()->getRelatedProductCollection()->addAttributeToSelect('*');
+            $products = $this->catalogHelper->transformProduct($products);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($products);
+            return (array) $response;
+        } catch (Exception $e) {
+            $response->setMessage($e->getMessage());
+        }
+        return $response;
     }
 
     public function getCategories()
     {
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_CATEGORY_RESOURCE,
-            'message' => 'No Categories Found',
-            'data' => []
-        ];
         try {
-            $categories = $this->categoryCollectionFactory->create();
-            $categories->addAttributeToSelect('*');
-            $categories->setStore($this->storeManager->getStore());
-            $categories->addAttributeToFilter('is_active', '1');
-            $categories = $this->transformCategory($categories);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_CATEGORY_RESOURCE,
-                'message' => 'success',
-                'data' => $categories
-            ];
-
+        $treeData = $this->tree->getTree($this->tree->getRootNode());
+        return $treeData;
         } catch (Exception $e) {
-            return $response;
+            $this->logger->debug($e->getMessage());
         }
+        return null;
     }
 
     public function getProductsByCategoryId($categoryId)
     {
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_CATEGORY_RESOURCE,
-            'message' => 'No Products in Category Found',
-            'data' => []
-        ];
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_CATEGORY_RESOURCE);
         try {
             $categories = $this->categoryCollectionFactory->create();
             $categories->addAttributeToSelect('*')->addFieldToFilter('entity_id', array('in' => $categoryId));
             $categories->setStore($this->storeManager->getStore());
             $categories->addAttributeToFilter('is_active', '1');
-            $categories = $this->transformCategory($categories);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_CATEGORY_RESOURCE,
-                'message' => 'success',
-                'data' => $categories
-            ];
+            $categories = $this->catalogHelper->transformCategory($categories);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($categories);
+            return (array) $response;
 
         } catch (Exception $e) {
-            return $response;
+            $response->setMessage($e->getMessage());
         }
+        return $response;
     }
 
     public function getProductsByCategorySlug($categorySlug)
     {
-        $response = [
-            'status' => 200,
-            'resource' => self::CATALOG_CATEGORY_RESOURCE,
-            'message' => 'No Products in Category Found',
-            'data' => []
-        ];
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_CATEGORY_RESOURCE);
         try {
             $categories = $this->categoryCollectionFactory->create();
             $categories->addAttributeToSelect('*')->addFieldToFilter( [
@@ -298,85 +326,30 @@ class CatalogProduct implements CatalogProductInterface
             ]);
             $categories->setStore($this->storeManager->getStore());
             $categories->addAttributeToFilter('is_active', '1');
-            $categories = $this->transformCategory($categories);
-            return [
-                'status' => 200,
-                'resource' => self::CATALOG_CATEGORY_RESOURCE,
-                'message' => 'success',
-                'data' => $categories
-            ];
+            $categories = $this->catalogHelper->transformCategory($categories);
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($categories);
 
         } catch (Exception $e) {
-            return $response;
+            $response->setMessage($e->getMessage());
         }
+        return $response;
     }
 
-    public function getProductMediaGallery($productSku)
-    {
-        $mediaGallery = [];
-        $mediaGalleryEntries = $this->productRepository->get($productSku)->getMediaGalleryEntries();
-        foreach ($mediaGalleryEntries as $media) {
-            $mediaGallery[] = $media->getData();
+    public function getProductsPosition($categoryId){
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CATALOG_CATEGORY_RESOURCE);
+        try {
+            $category = $this->category->load($categoryId);
+            $positions = $category->getProductsPosition();
+            $response->setStatus(true);
+            $response->setMessage('success');
+            $response->setData($positions);
+            return (array) $response;
+        } catch(Exception $e){
+            $response->setMessage($e->getMessage());
         }
-        return $mediaGallery;
-    }
-
-    public function getProductCustomAttributes($productSku)
-    {
-        $customAttributes = [];
-        $customAttributesEntries = $this->productRepository->get($productSku)->getCustomAttributes();
-        foreach ($customAttributesEntries as $customAttribute) {
-            $customAttributes[$customAttribute->getAttributeCode()] = $customAttribute->getValue();
-        }
-        return $customAttributes;
-    }
-
-    public function transformProduct($products)
-    {
-        $result = [];
-        if (isset($products) && count($products) > 0) {
-            foreach ($products as $product) {
-                $result[] = [
-                    'id' => (int)$product->getId(),
-                    'type' => $product->getTypeId(),
-                    'sku' => $product->getSku(),
-                    'name' => $product->getName(),
-                    'url_key' => $product->getUrlKey(),
-                    'image' => $product->getImage(),
-                    'small_image' => $product->getSmallImage(),
-                    'thumbnail' => $product->getThumbnail(),
-                    'price' => number_format($product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue(), 2, '.', ','),
-                    'is_in_stock' => $this->stockItemRepository->get($product->getId())->getIsInStock(),
-                    'qty' => $this->stockItemRepository->get($product->getId())->getQty(),
-                    'min_qty' => $this->stockItemRepository->get($product->getId())->getMinQty(),
-                    'min_sale_qty' => $this->stockItemRepository->get($product->getId())->getMinSaleQty(),
-                    'max_sale_qty' => $this->stockItemRepository->get($product->getId())->getMaxSaleQty(),
-                    'categories' => $product->getCategoryIds(),
-                    'media_gallery' => $this->getProductMediaGallery($product->getSku()),
-                    'position' => $product->getCatIndexPosition(),
-                    'created_at' => $product->getCreatedAt(),
-                    'updated_at' => $product->getUpdatedAt(),
-                ];
-            }
-        }
-        return $result;
-    }
-
-    public function transformCategory($categories)
-    {
-        $result = [];
-        if (isset($categories) && count($categories) > 0) {
-            foreach ($categories as $category) {
-                $result[] = [
-                    'id' => (int)$category->getId(),
-                    'name' => $category->getName(),
-                    'url_key' => $category->getUrlKey(),
-                    'image' => $category->getImage(),
-                    'total_products' => $category->getProductCount(),
-                    'products' => $this->transformProduct($category->getProductCollection()->addAttributeToSelect('*')->addAttributeToSort('position'))
-                ];
-            }
-        }
-        return $result;
+        return $response;
     }
 }

@@ -297,6 +297,5 @@ return array(
     '940abd8fb01ee76a36b44f35dcf9783b' => $vendorDir . '/weew/helpers-array/src/array.php',
     '43a898c2b52882ecca1f7b0558d3af2c' => $vendorDir . '/magento/composer-root-update-plugin/registration.php',
     'eda65932675b68b5aee4503e0762d64d' => $vendorDir . '/magento/magento2-functional-testing-framework/src/Magento/FunctionalTestingFramework/_bootstrap.php',
-    '157606ef401fb845049aec568283a08e' => $vendorDir . '/smile/module-seller/registration.php',
     'b4cf39431a4b949eea8aa69ebb3d39da' => $baseDir . '/app/etc/NonComposerComponentRegistration.php',
 );

@@ -11,7 +11,23 @@ use Magento\Framework\Exception\AuthenticationException;
 use Magento\Integration\Model\CredentialsValidator;
 use Magento\Integration\Model\Oauth\Token\RequestThrottler;
 use Magento\Integration\Model\ResourceModel\Oauth\Token\CollectionFactory as TokenCollectionFactory;
-
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Customer\Model\CustomerFactory;
+use Magento\Customer\Model\ResourceModel\Customer\Collection  as CustomerCollection;
+use Magento\Customer\Model\ResourceModel\Customer as CustomerResource;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Model\AddressFactory;
+use Magento\Customer\Api\Data\AddressInterfaceFactory;
+use Magento\Customer\Api\AddressRepositoryInterface;
+use Magento\Directory\Model\ResourceModel\Region\Collection as RegionCollection;
+use Magento\Directory\Model\ResourceModel\Region\CollectionFactory as RegionCollectionFactory;
+use Magento\Integration\Model\Oauth\TokenFactory;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
+use Psr\Log\LoggerInterface;
+use Magento\Framework\Math\Random;
+use Magento\Framework\Intl\DateTimeFactory;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+use Honasa\Base\Model\Data\ResponseFactory;
 /**
  * Defines the implementaiton class of the calculator service contract.
  */
@@ -28,31 +44,29 @@ class CustomerEntity implements CustomerEntityInterface
     protected $searchCriteriaBuilder;
 
     public function __construct(
-        \Magento\Store\Model\StoreManagerInterface                      $storeManager,
-        \Magento\Framework\Api\SearchCriteriaBuilder                    $searchCriteriaBuilder,
-        \Magento\Customer\Model\CustomerFactory                         $customerFactory,
-        \Magento\Customer\Model\ResourceModel\Customer\Collection       $customerCollection,
-        \Magento\Customer\Model\ResourceModel\Customer                  $customerResource,
-        \Magento\Customer\Api\CustomerRepositoryInterface               $customerRepository,
-        \Magento\Customer\Model\AddressFactory                          $addressFactory,
-        \Magento\Customer\Api\Data\AddressInterfaceFactory              $addressInterfaceFactory,
-        \Magento\Customer\Api\AddressRepositoryInterface                $addressRepository,
-        \Magento\Customer\Api\Data\AddressInterfaceFactory              $addressDataFactory,
-        \Magento\Directory\Model\ResourceModel\Region\Collection        $regionCollection,
-        \Magento\Directory\Model\ResourceModel\Region\CollectionFactory $regionFactory,
-        \Magento\Integration\Model\Oauth\TokenFactory                   $tokenModelFactory,
-        \Magento\Sales\Model\ResourceModel\Order\CollectionFactory      $orderCollection,
-        \Psr\Log\LoggerInterface                                        $logger,
-        \Magento\Framework\Math\Random                                  $mathRandom,
-        \Magento\Framework\Intl\DateTimeFactory                         $dateTimeFactory,
-        \Magento\Framework\Stdlib\DateTime\TimezoneInterface            $timezone,
-        AccountManagementInterface                                      $accountManagement,
-        TokenCollectionFactory                                          $tokenModelCollectionFactory,
-        CredentialsValidator                                            $validatorHelper,
-        ManagerInterface                                                $eventManager = null,
-        array                                                           $data = []
-    )
-    {
+        StoreManagerInterface $storeManager,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        CustomerFactory $customerFactory,
+        CustomerCollection $customerCollection,
+        CustomerResource $customerResource,
+        CustomerRepositoryInterface $customerRepository,
+        AddressFactory $addressFactory,
+        AddressRepositoryInterface $addressRepository,
+        AddressInterfaceFactory $addressDataFactory,
+        RegionCollection $regionCollection,
+        RegionCollectionFactory $regionFactory,
+        TokenFactory $tokenModelFactory,
+        OrderCollectionFactory $orderCollection,
+        LoggerInterface $logger,
+        Random $mathRandom,
+        DateTimeFactory $dateTimeFactory,
+        TimezoneInterface $timezone,
+        AccountManagementInterface  $accountManagement,
+        TokenCollectionFactory $tokenModelCollectionFactory,
+        CredentialsValidator $validatorHelper,
+        ManagerInterface $eventManager = null,
+        ResponseFactory $responseFactory
+        ){
         $this->storeManager = $storeManager;
         $this->customerFactory = $customerFactory;
         $this->customerRepository = $customerRepository;
@@ -64,7 +78,6 @@ class CustomerEntity implements CustomerEntityInterface
         $this->orderCollection = $orderCollection;
         $this->logger = $logger;
         $this->addressRepository = $addressRepository;
-        $this->addressInterfaceFactory = $addressInterfaceFactory;
         $this->addressDataFactory = $addressDataFactory;
         $this->regionCollection = $regionCollection;
         $this->regionFactory = $regionFactory;
@@ -76,32 +89,30 @@ class CustomerEntity implements CustomerEntityInterface
         $this->eventManager = $eventManager ?: \Magento\Framework\App\ObjectManager::getInstance()
             ->get(ManagerInterface::class);
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->responseFactory = $responseFactory;
 
     }
 
     public function registerCustomer($data)
     {
-        $response = [
-            'status' => 200,
-            'resource' => self::CUSTOMER_ENTITY_RESOURCE,
-            'message' => 'Data Parameters: firstName/lastName/email/mobileNumber/gendermissing',
-            'data' => []
-        ];
+        $response = $this->responseFactory->create();
+        $response->setResource(self::CUSTOMER_ENTITY_RESOURCE);
 
         try {
-            $firstName = $data['firstname'];
-            $lastName = $data['lastname'];
-            $mobileNumber = $data['mobile_number'];
-            $email = $data['email'];
-            $gender = $data['gender'];
+            $firstName = isset($data['firstname'] ) ? $data['firstname'] : '';
+            $lastName = isset($data['lastname'] ) ? $data['lastname'] : '';
+            $mobileNumber = isset($data['mobile_number'] ) ? $data['mobile_number'] : '';
+            $email = isset($data['email'] ) ? $data['email'] : '';
+            $gender = isset($data['gender']) ? $data['gender'] : 0;
+            $dob = isset($data['dob']) ? $data['dob'] : null;
             $websiteId = $this->storeManager->getStore()->getWebsiteId();
 
             if (
-                isset($email) &&
-                isset($firstName) &&
-                isset($lastName) &&
-                isset($gender) &&
-                isset($mobileNumber)
+                !is_null($email) &&
+                !is_null($firstName) &&
+                !is_null($lastName) &&
+                !is_null($gender) &&
+                !is_null($mobileNumber)
             ) {
                 // Check if mobile number already exists
                 $customerIdByMobileNumber = $this->customerFactory->create()->getCollection()->addAttributeToSelect('id')
@@ -109,7 +120,7 @@ class CustomerEntity implements CustomerEntityInterface
                     ->load()
                     ->getFirstItem()->getData('entity_id');
                 if ($customerIdByMobileNumber) {
-                    $response['message'] = 'Customer Mobile Number Already Registered, Please Signup with a different email or login';
+                    $response->setMessage('Customer Mobile Number Already Registered, Please Signup with a different email or login');
                     return $response;
                 }
 
@@ -119,7 +130,7 @@ class CustomerEntity implements CustomerEntityInterface
                     ->load()
                     ->getFirstItem()->getData('entity_id');
                 if ($customerIdByEmail) {
-                    $response['message'] = 'Customer Email Already Registered, Please Signup with a different email or login';
+                    $response->setMessage('Customer Email Already Registered, Please Signup with a different email or login');
                     return $response;
                 }
 
@@ -128,6 +139,11 @@ class CustomerEntity implements CustomerEntityInterface
                 $customer->setWebsiteId($websiteId);
                 $customer->setEmail($email);
                 $customer->setFirstname($firstName);
+                $customer->setGender($gender);
+                if(!is_null($dob))
+                {
+                    $customer->setDob($dob);
+                }
                 $customer->setLastname($lastName);
                 $customer->setDefaultBilling(0);
                 $customer->setDefaultShipping(0);
@@ -156,27 +172,25 @@ class CustomerEntity implements CustomerEntityInterface
 
                 $customerToken = $this->tokenModelFactory->create();
                 $token = $customerToken->createCustomerToken($customerId)->getToken();
+                $response->setStatus(true);
+                $response->setMessage('success');
+                $response->setData([
+                    'customer_id' => $customerId,
+                    'token' => $token,
+                    'firstname' => $firstName,
+                    'lastname' => $lastName,
+                    'email' => $email,
+                    'mobile_number' => $mobileNumber
+                ]);
 
-                return [
-                    'status' => 201,
-                    'resource' => self::CUSTOMER_ENTITY_RESOURCE,
-                    'message' => 'success',
-                    'data' => [
-                        'firstName' => $firstName,
-                        'lastName' => $lastName,
-                        'gender' => $gender,
-                        'mobileNumber' => $mobileNumber,
-                        'token' => $token
-                    ]
-                ];
+               
             }
-            return $response;
+            return (array) $response;
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
-            throw new \Magento\Framework\Exception\LocalizedException(
-                __('Customer Registration Failed')
-            );
+            $response->setMessage($e->getMessage());
         }
+        return $response;
     }
 
     public function getCustomerDetailsById($customerId)

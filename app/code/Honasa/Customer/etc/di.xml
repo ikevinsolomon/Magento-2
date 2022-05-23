@@ -13,4 +13,8 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Honasa\Customer\Api\CustomerEntityInterface" type="Honasa\Customer\Model\CustomerEntity"/>
+    <preference for="Magento\Customer\Ui\Component\DataProvider" type="Honasa\Customer\Ui\Component\DataProvider"/>
+    <type name="Magento\Customer\Model\Customer\DataProviderWithDefaultAddresses">
+        <plugin name="customer_form_data_provider_plugin" type="Honasa\Customer\Plugin\DataProviderWithDefaultAddresses" />
+    </type>
 </config>

@@ -50,6 +50,27 @@
         </resources>
     </route>
 
+     <route url="/V1/catalog/products/id/:productId/up-sell" method="GET">
+        <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getUpSellProductsById"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/id/:productId/cross-sell" method="GET">
+        <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getCrossSellProductsById"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/id/:productId/related" method="GET">
+        <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getRelatedProductsById"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
     <route url="/V1/catalog/categories" method="GET">
         <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getCategories"/>
         <resources>
@@ -59,6 +80,13 @@
 
     <route url="/V1/catalog/categories/id/:categoryId/products" method="GET">
         <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getProductsByCategoryId"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/id/:categoryId/positions" method="GET">
+        <service class="Honasa\Catalog\Api\CatalogProductInterface" method="getProductsPosition"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>

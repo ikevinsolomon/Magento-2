@@ -7,4 +7,5 @@
     <type name="Magento\Catalog\Ui\DataProvider\Product\ProductDataProvider">
         <plugin name="join_product_grid_with_stock_status" type="Honasa\Catalog\Plugin\Ui\DataProvider\Product\ProductDataProvider" sortOrder="100" />
     </type>
+    <preference for="Magento\CatalogUrlRewrite\Observer\CategoryUrlPathAutogeneratorObserver" type="Honasa\Catalog\Observer\CategoryUrlPathAutogeneratorObserver" />
 </config>

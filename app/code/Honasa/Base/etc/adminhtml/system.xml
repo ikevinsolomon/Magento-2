@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+
+    <system>
+        <tab id="online_payment_config" translate="label" sortOrder="100">
+            <label>Honasa</label>
+        </tab>
+        <section id="honasa_config" translate="label" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Honasa Configuration</label>
+            <tab>online_payment_config</tab>
+            <resource>Online_Payment::config</resource>
+            <group id="config" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Online Payment</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Is Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="value" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Online discount value</label>
+                </field>
+                <field id="dateEnabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Date Specific Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="dateSpecificValue" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Date specific online discount value</label>
+                </field>
+            </group>
+            <group id="coupon" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Cashback category</label>
+                <field id="cashback_category_skip" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Category to skip</label>
+                </field>
+            </group>
+            <group id="attributes" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Product Attributes</label>
+                <field id="attributes_to_skip" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Attributes To Skip</label>
+                </field>
+            </group>
+            <group id="sqs" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>SQS</label>
+                <field id="key" translate="label" sortOrder="10" type = "obscure" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="secret" translate="label" sortOrder="10" type = "obscure" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Secret</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                 <field id="region" translate="label" sortOrder="10"  showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Region</label>
+                </field>
+                <field id="catalog_product_queue" translate="label" sortOrder="10"  showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Catalog Product Queue</label>
+                </field>
+                 <field id="catalog_category_queue" translate="label" sortOrder="10"  showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Catalog Category Queue</label>
+                </field>
+                <field id="catalog_message_group_id" translate="label" sortOrder="10"  showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Catalog Message Group Id</label>
+                </field>
+                
+            </group>
+
+        </section>
+    </system>
+</config>

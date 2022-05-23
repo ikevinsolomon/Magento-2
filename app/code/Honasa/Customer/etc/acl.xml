@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Honasa_Customer
+ *
+ * @category  XML
+ * @package   Honasa\Customer
+ * @author    Honasa Consumer Pvt. Ltd
+ * @copyright 2022 Copyright (c) Honasa Consumer Pvt Ltd
+ * @link      https://www.mamaearth.in/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+	<acl>
+		<resources>
+			<resource id="Magento_Backend::admin">
+				<resource id="Magento_Backend::stores">
+					<resource id="Magento_Backend::stores_settings">
+						<resource id="Magento_Config::config">
+							<resource id="Honasa_Customer::config_honasa_customer" title="Customer Mask"/>
+						</resource>
+					</resource>
+				</resource>
+			</resource>
+		</resources>
+	</acl>
+</config>

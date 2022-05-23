@@ -7,6 +7,9 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     <event name="catalog_product_save_commit_after">
-        <observer name="magento_product_save_after" instance="Honasa\Catalog\Observer\UpdateCatalogProductCache" />
+        <observer name="magento_product_save_after" instance="Honasa\Catalog\Observer\UpdateProduct" />
+    </event>
+    <event name="catalog_category_save_after">
+        <observer name="magento_category_save_after" instance="Honasa\Catalog\Observer\UpdateCategory" />
     </event>
 </config>

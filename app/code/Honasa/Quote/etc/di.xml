@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/ObjectManager/etc/config.xsd">
+
+	<preference for="Honasa\Quote\Api\CustomerCartInterface" type="Honasa\Quote\Model\CartItem"/>
+	<preference for="Honasa\Quote\Api\Data\CartdataInterface" type="Honasa\Quote\Model\Cartdata"/>
+	<preference for="\Magento\Quote\Model\Quote\Address\Total\AbstractTotal" type="Honasa\Quote\Model\Rewrite\Total" />
+	<preference for="Honasa\Quote\Api\Data\DuplicatecartInterface" type="Honasa\Quote\Model\Duplicatecart" />
+	<preference for="\Magento\Quote\Model\CouponManagement" type="Honasa\Quote\Model\CouponManagement" />
+	<preference for="\Magento\Quote\Model\GuestCart\GuestCouponManagement" type="Honasa\Quote\Model\GuestCart\GuestCouponManagement" />
+</config>
